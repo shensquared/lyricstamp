@@ -86,9 +86,8 @@ def main(in_name="lyrics.txt"):
                     counter += 1
                 if event.key == pygame.K_UP:
                     counter -= 1
-                    # print(lines[counter].split(']'))
+                    # remove the old/wrong timestamp
                     lines[counter] = " ".join(lines[counter].split(']')[1:])[1:]
-                    # lines[counter] = lines[counter].split('] ')
                 if event.key == pygame.K_RETURN and counter == len(lines):
                     save_lyrics(lines, out_name)
                     running = False
