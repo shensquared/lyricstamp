@@ -1,7 +1,7 @@
-Play a keyboard game alongside a song/audiobook, to convert plain text `.txt` lyrics into time-stamped `.lrcx` . Use the time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX), for synchronized lyrics display when you play the same media in the future.
+Play a keyboard game alongside a song/audiobook, to convert plain text `.txt` lyrics into time-stamped `.lrcx` . Use the produced time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics display.
 
 ### Usage:
-The timestamps insertion relies partially on you playing a keyboard `pygame` along the media (think lip sync). Run `python3 lyricstamp.py` to call out the interface. (Currently the `lyrics.txt` file is hard-coded to the song "Je Lui Dirai" by "Céline Dion". Automation incoming.)
+The time-stamps' insertion relies partially on you playing a keyboard `pygame` along with the media (think lip sync). Run `python3 lyricstamp.py` to call out the interface. (Currently the `lyrics.txt` file is hard-coded to the song "Je Lui Dirai" by "Céline Dion". Automation incoming.)
 - Press 'S' to start media playing, and simultaneously reset timer
 - Press 'Down-Arrow' to add stamp to the next line
 - Press 'E' to end stamping, and save a `Je Lui Dirai - Céline Dion.lrcx` file in your LyricsX folder. 
