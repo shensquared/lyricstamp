@@ -23,15 +23,16 @@ def screen_banner(screen, text):
     text_to_screen(screen, text, 20, 10, size=30, color=(255, 000, 000))
 
 
-def print_info(screen, lines, state):
+def print_info(screen, lines, state, counter):
     for i, l in enumerate(lines):
-        text_to_screen(screen, l, 20, 20 * (i + 2))
+        if i>=counter-3 and i <counter +10:
+            text_to_screen(screen, l, 20, 20 * (i-counter + 6))
     if state == -1:
         screen_banner(screen, "Press S to start playing the song (and reset timer)")
     elif state == 1:
         screen_banner(screen, "Press E to end")
     else:
-        screen_banner(screen, "Press Down-arrow to go to the next line")
+        screen_banner(screen, "Press Down-Arrow to go to the next line")
 
 
 def save_lyrics(lines, out_name):
@@ -40,6 +41,7 @@ def save_lyrics(lines, out_name):
     out_name += '.lrcx'
     with open(os.path.join(path, out_name), "w") as f:
         [f.write(i) for i in lines]
+    print('Saved '+out_name+' in '+path)
 
 
 def stamp(begin, end):
@@ -60,7 +62,7 @@ def main(in_name="lyrics.txt"):
     counter = 0
     background_colour = (255, 255, 255)
 
-    (width, height) = (max([len(i) for i in lines]) * 10, len(lines) * 25)
+    (width, height) = (max([len(i) for i in lines]) * 10, 15 * 25)
 
     pygame.init()
     screen = pygame.display.set_mode((width, height))
@@ -93,7 +95,7 @@ def main(in_name="lyrics.txt"):
                     pygame.quit()
                     break
             screen.fill(background_colour)
-            print_info(screen, lines, state)
+            print_info(screen, lines, state, counter)
             pygame.display.update()
             clock.tick(40)
 
