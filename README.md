@@ -6,7 +6,7 @@ The timestamps insertion relies partially on you playing a keyboard `pygame` alo
 - Press 'Down-Arrow' to add stamp to the next line
 - Press 'E' to end stamping, and save a `Je Lui Dirai - Céline Dion.lrcx` file in your LyricsX folder. 
 
-![[demo.gif]]
+![Demo](demo.gif)
 
 Tips:
 - AirPlaying to e.g. Homepods creates a (systemetic) delay that needs to be adjusted via adding a manual offset. Either avoid this by playing 
