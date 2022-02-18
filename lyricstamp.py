@@ -19,22 +19,20 @@ def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type
         raise e
 
 
-def screen_banner(screen, text, y=10):
-    text_to_screen(screen, text, 20, y, size=30, color=(255, 000, 000))
-
+def screen_banner(screen, text1, text2, y=10):
+    text_to_screen(screen, text1, 20, 10, size=30, color=(255, 000, 000))
+    text_to_screen(screen, text2, 20, 30, size=30, color=(255, 000, 000))
 
 def print_info(screen, lines, counter, out_name=''):
     for i, l in enumerate(lines):
         if counter - 3 < i < counter + 10:
             text_to_screen(screen, str(i) + ': ' + l, 20, 20 * (i - counter + 6))
     if counter == 0:
-        screen_banner(screen, "Press 'Down-Arrow' to start playing")
-        screen_banner(screen, "and reset the timer", y=30)
+        screen_banner(screen, "Press 'Down-Arrow' to start playing", "and reset the timer")
     elif counter == len(lines):
-        screen_banner(screen, "Press Enter to end stamping and confirm")
-        screen_banner(screen, out_name + "will be saved", y=30)
+        screen_banner(screen, "Press Enter to end stamping and confirm", out_name + "will be saved")
     else:
-        screen_banner(screen, "Press 'Down-Arrow' to go to the next line")
+        screen_banner(screen, "Press 'Down-Arrow' to go to the next line", "'Up-Arrow' to go back to the previous line." )
 
 
 def save_lyrics(lines, out_name):
@@ -86,6 +84,11 @@ def main(in_name="lyrics.txt"):
                         now = time.time()
                         lines[counter] = stamp(begin, now) + ' ' + lines[counter]
                     counter += 1
+                if event.key == pygame.K_UP:
+                    counter -= 1
+                    # print(lines[counter].split(']'))
+                    lines[counter] = " ".join(lines[counter].split(']')[1:])[1:]
+                    # lines[counter] = lines[counter].split('] ')
                 if event.key == pygame.K_RETURN and counter == len(lines):
                     save_lyrics(lines, out_name)
                     running = False
