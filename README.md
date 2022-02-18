@@ -6,7 +6,13 @@ The timestamps insertion relies partially on you playing a keyboard `pygame` alo
 - Press 'Down-Arrow' to add stamp to the next line
 - Press 'E' to end stamping, and save a `Je Lui Dirai - Céline Dion.lrcx` file in your LyricsX folder. 
 
-Demo incoming
+![[demo.gif]]
+
+Tips:
+- AirPlaying to e.g. Homepods creates a (systemetic) delay that needs to be adjusted via adding a manual offset. Either avoid this by playing 
+directly via the built-in speaker; or experiment to get your systemtic delay value (to be embedded in the script gloablly)
+
+
 ### Motivation:
 - LyricsX works wonders with Apple Music, especially for songs with no built-in synchronized lyrics. However, LyricsX relies on `*.lrcx` searched and fetched from a few Asia-based web services, and understandably, supply for songs in other languages or indie/obscure songs are scarce. And while plain-text lyrics are abundant online, time-stamping solutions I've found (e.g. NLP-based, iMovie timeline adjustment) are either an overkill or a hassle. 
 - Audiobooks (particularly those targeted at language learning) can benefit greatly from having synchronized listening/reading too. These audiobooks often do come with an accompanying .pdf or .epub for the scripts, which can be easily turned into .txt, but time-stamping is still a hassle. (Fwiw, my limited research had led me to the so-called 'forced alignment', a sound-wave-analysis-based technique to align texts and audio. Not sure if/how well it can handle multi-language in a single file though.)

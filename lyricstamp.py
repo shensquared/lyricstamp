@@ -77,9 +77,9 @@ def main(in_name="lyrics.txt"):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
                     state = 0
-                    begin = time.time()
                     play()
                     lines.insert(0, "[00:00.000]" + out_name + "\n")
+                    begin = time.time()
                 if event.key == pygame.K_DOWN:
                     counter += 1
                     # insert new stamp into line
