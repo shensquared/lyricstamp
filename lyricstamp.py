@@ -25,7 +25,7 @@ def screen_banner(screen, text, y=10):
 
 def print_info(screen, lines, counter, out_name=''):
     for i, l in enumerate(lines):
-        if i >= counter - 3 and i < counter + 10:
+        if counter - 3 < i < counter + 10:
             text_to_screen(screen, str(i) + ': ' + l, 20, 20 * (i - counter + 6))
     if counter == 0:
         screen_banner(screen, "Press 'Down-Arrow' to start playing")
@@ -50,12 +50,10 @@ def stamp(begin, end):
     time = end - begin
     m = str(int(time / 60)).rjust(2, '0')
     s = str(round(time % 60, 3)).rjust(2, '0')
-    stamp = "[" + m + ":" + s + "]"
-    return stamp
+    return "[" + m + ":" + s + "]"
 
 
 def main(in_name="lyrics.txt"):
-    # state -1, 0, or 1. -1: haven't started stamping; 0: in the process; 1: at the last line
     with open(in_name) as f:
         lines = f.readlines()
     title, artist = now_playing()
