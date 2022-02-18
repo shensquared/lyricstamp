@@ -19,20 +19,22 @@ def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type
         raise e
 
 
-def screen_banner(screen, text):
-    text_to_screen(screen, text, 20, 10, size=30, color=(255, 000, 000))
+def screen_banner(screen, text, y=10):
+    text_to_screen(screen, text, 20, y, size=30, color=(255, 000, 000))
 
 
-def print_info(screen, lines, state, counter):
+def print_info(screen, lines, counter, out_name=''):
     for i, l in enumerate(lines):
-        if i>=counter-3 and i <counter +10:
-            text_to_screen(screen, l, 20, 20 * (i-counter + 6))
-    if state == -1:
-        screen_banner(screen, "Press S to start playing the song (and reset timer)")
-    elif state == 1:
-        screen_banner(screen, "Press E to end")
+        if i >= counter - 3 and i < counter + 10:
+            text_to_screen(screen, str(i) + ': ' + l, 20, 20 * (i - counter + 6))
+    if counter == 0:
+        screen_banner(screen, "Press 'Down-Arrow' to start playing")
+        screen_banner(screen, "and reset the timer", y=30)
+    elif counter == len(lines):
+        screen_banner(screen, "Press Enter to end stamping and confirm")
+        screen_banner(screen, out_name + "will be saved", y=30)
     else:
-        screen_banner(screen, "Press Down-Arrow to go to the next line")
+        screen_banner(screen, "Press 'Down-Arrow' to go to the next line")
 
 
 def save_lyrics(lines, out_name):
@@ -41,7 +43,7 @@ def save_lyrics(lines, out_name):
     out_name += '.lrcx'
     with open(os.path.join(path, out_name), "w") as f:
         [f.write(i) for i in lines]
-    print('Saved '+out_name+' in '+path)
+    print('Saved ' + out_name + ' in ' + path)
 
 
 def stamp(begin, end):
@@ -58,10 +60,9 @@ def main(in_name="lyrics.txt"):
         lines = f.readlines()
     title, artist = now_playing()
     out_name = title + ' - ' + artist
-    state = -1
+    lines.insert(0, out_name + "\n")
     counter = 0
     background_colour = (255, 255, 255)
-
     (width, height) = (max([len(i) for i in lines]) * 10, 15 * 25)
 
     pygame.init()
@@ -74,28 +75,28 @@ def main(in_name="lyrics.txt"):
     clock = pygame.time.Clock()
 
     while running:
-        # print(len(lines))
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_s:
-                    state = 0
-                    play()
-                    lines.insert(0, "[00:00.000]" + out_name + "\n")
-                    begin = time.time()
                 if event.key == pygame.K_DOWN:
+                    print("Current cursor counter is at: " + str(counter))
+                    if counter == 0:
+                        play()
+                        lines[counter] = "[00:00.000]" + ' ' + lines[counter]
+                        begin = time.time()
+                    elif counter <= len(lines) - 1:
+                        # insert new stamp into line
+                        now = time.time()
+                        lines[counter] = stamp(begin, now) + ' ' + lines[counter]
                     counter += 1
-                    # insert new stamp into line
-                    now = time.time()
-                    lines[counter] = stamp(begin, now) + ' ' + lines[counter]
-                    if counter == len(lines) - 1:
-                        state = 1
-                if event.key == pygame.K_e:
+                if event.key == pygame.K_RETURN and counter == len(lines):
                     save_lyrics(lines, out_name)
                     running = False
                     pygame.quit()
                     break
+                if event.key == pygame.K_ESCAPE:
+                    return
             screen.fill(background_colour)
-            print_info(screen, lines, state, counter)
+            print_info(screen, lines, counter, out_name)
             pygame.display.update()
             clock.tick(40)
 
