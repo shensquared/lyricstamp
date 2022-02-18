@@ -7,7 +7,8 @@ The time-stamps' insertion relies partially on you playing a keyboard `pygame` a
 - Press 'S' to start media playing, and simultaneously reset timer
 - Press 'Down-Arrow' to add stamp to the next line
 - Press 'E' to end stamping, and save a `Je Lui Dirai - Céline Dion.lrcx` file in your LyricsX folder. 
-[YouTube Demo](https://youtu.be/YNDgCe37LqE) (Just more high-def than the Gif.)
+
+[YouTube Demo](https://youtu.be/YNDgCe37LqE) (Just more high-def than the Gif below.)
 
 ![Demo](demo.gif)
 
