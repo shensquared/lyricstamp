@@ -11,7 +11,7 @@ The time-stamps' insertion relies partially on you playing a keyboard `pygame` a
 - Press 'Up-Arrow' to go back one line (e.g. to correct a 'jumped the gun')
 - Press 'Enter' to end stamping, and save a `Je Lui Dirai - Céline Dion.lrcx` file in your LyricsX folder. (The file name is auto-extracted from Music's now playing track properties via AppleScript) 
 
-[YouTube Demo](https://youtu.be/YNDgCe37LqE) (Just more high-def than the Gif below. Both need to be updated though...)
+[YouTube Demo](https://youtu.be/qZp7A0i0zl0) (Where the gif below was generated from)
 ![Demo](/demos/demo.gif)
 
 #### Tips:
