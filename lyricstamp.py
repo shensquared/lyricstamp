@@ -1,4 +1,3 @@
-# coding: utf-8
 import pygame
 import time
 import os
@@ -6,33 +5,11 @@ import sys
 from player_control import now_playing, play
 
 
-# Modified from https://gist.github.com/seankmartin/f660eff4787b586f94d5f678932bcd27
-def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type=''):
-    # TODO: Non-western chars not displaying
-    try:
-        text = str(text)
-        font = pygame.font.Font(None, size)
-        text = font.render(text, True, color)
-        screen.blit(text, (x, y))
-    except Exception as e:
-        print('Font Error, saw it coming')
-        raise e
-
-
-def screen_banner(screen, text1, text2, y=10):
-    text_to_screen(screen, text1, 20, 10, size=30, color=(255, 000, 000))
-    text_to_screen(screen, text2, 20, 30, size=30, color=(255, 000, 000))
-
-def print_info(screen, lines, counter, out_name=''):
-    for i, l in enumerate(lines):
-        if counter - 3 < i < counter + 10:
-            text_to_screen(screen, str(i) + ': ' + l, 20, 20 * (i - counter + 6))
-    if counter == 0:
-        screen_banner(screen, "Press 'Down-Arrow' to start playing", "and reset the timer")
-    elif counter == len(lines):
-        screen_banner(screen, "Press Enter to end stamping and confirm", out_name + "will be saved")
-    else:
-        screen_banner(screen, "Press 'Down-Arrow' to go to the next line", "'Up-Arrow' to go back to the previous line." )
+def stamp(begin, end):
+    time = end - begin
+    m = str(int(time / 60)).rjust(2, '0')
+    s = str(round(time % 60, 3)).rjust(2, '0')
+    return "[" + m + ":" + s + "]"
 
 
 def save_lyrics(lines, out_name):
@@ -44,11 +21,37 @@ def save_lyrics(lines, out_name):
     print('Saved ' + out_name + ' in ' + path)
 
 
-def stamp(begin, end):
-    time = end - begin
-    m = str(int(time / 60)).rjust(2, '0')
-    s = str(round(time % 60, 3)).rjust(2, '0')
-    return "[" + m + ":" + s + "]"
+# Modified from https://gist.github.com/seankmartin/f660eff4787b586f94d5f678932bcd27
+# TODO: Non-western chars not displaying
+def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type=''):
+    try:
+        text = str(text)
+        font = pygame.font.Font(None, size)
+        text = font.render(text, True, color)
+        screen.blit(text, (x, y))
+    except Exception as e:
+        print('Font Error, saw it coming')
+        raise e
+
+
+def screen_banner(screen, text1, text2, y=10):
+    color = (255, 000, 000)
+    size = 30
+    text_to_screen(screen, text1, 20, 10, size=size, color=color)
+    text_to_screen(screen, text2, 20, 35, size=size, color=color)
+
+
+def print_info(screen, lines, counter, out_name=''):
+    for i, l in enumerate(lines):
+        if counter - 3 < i < counter + 10:
+            text_to_screen(screen, str(i) + ': ' + l, 20, 20 * (i - counter + 6))
+    if counter == 0:
+        screen_banner(screen, "Press 'Down-Arrow'", "to start the media playing and reset the timer")
+    elif counter >= len(lines):
+        screen_banner(screen, "Press Enter to end stamping and confirm that", out_name + " will be saved")
+    else:
+        screen_banner(screen, "Press 'Down-Arrow' to go to the next line",
+                      "'Up-Arrow' to go back to the previous line.")
 
 
 def main(in_name="lyrics.txt"):
@@ -63,7 +66,7 @@ def main(in_name="lyrics.txt"):
 
     pygame.init()
     screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption('LyricStamp Timer')
+    pygame.display.set_caption('LyricStamp - ' + out_name)
     screen.fill(background_colour)
     pygame.display.flip()
 
@@ -74,7 +77,7 @@ def main(in_name="lyrics.txt"):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
-                    print("Current cursor counter is at: " + str(counter))
+                    print("Current cursor counter is at line: " + str(counter))
                     if counter == 0:
                         play()
                         lines[counter] = "[00:00.000]" + ' ' + lines[counter]
@@ -86,9 +89,12 @@ def main(in_name="lyrics.txt"):
                     counter += 1
                 if event.key == pygame.K_UP:
                     counter -= 1
-                    # remove the old/wrong timestamp
-                    lines[counter] = " ".join(lines[counter].split(']')[1:])[1:]
-                if event.key == pygame.K_RETURN and counter == len(lines):
+                    try:
+                        # remove the old/wrong timestamp
+                        lines[counter] = " ".join(lines[counter].split(']')[1:])[1:]
+                    except:
+                        pass
+                if event.key == pygame.K_RETURN and counter >= len(lines):
                     save_lyrics(lines, out_name)
                     running = False
                     pygame.quit()
