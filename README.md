@@ -1,7 +1,5 @@
 Play a keyboard game alongside a song/audiobook to convert plain text `.txt` lyrics into time-stamped `.lrcx` (think lip-sync). Then use the produced time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. 
 
-![Demo](/demos/demo.gif) ([YouTube Demo](https://youtu.be/qZp7A0i0zl0) (Where the gif below was generated from)
-
 (And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And to 🇫🇷learn languages🥷!)
 ![Demo](/demos/language.gif)
 
@@ -13,7 +11,8 @@ Run `python3 lyricstamp.py` to call out the 'game' interface. (Currently the `ly
 - Press 'Up-Arrow' to go to the previous lines (e.g. to correct a 'jumped the gun')
 - Press 'Enter' to end stamping, and save a `media_title - artist.lrcx` file to your LyricsX folder (where the `media_title` and `artist` are extracted from Music's now playing track properties via AppleScript). Enjoy!
 
-
+([YouTube Demo](https://youtu.be/qZp7A0i0zl0) (Where the gif below was generated from)
+![Demo](/demos/demo.gif) 
 
 #### Tips:
 - AirPlay-ing to e.g. Homepods creates a (systematic) delay that needs to be adjusted via adding a manual offset. Either avoid this by playing directly via the built-in speaker; or experiment to get your systematic delay value (to be embedded in the script globally)
