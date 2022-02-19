@@ -1,6 +1,6 @@
 Play a keyboard game alongside a song/audiobook to convert plain text `.txt` lyrics into time-stamped `.lrcx` (think lip-sync). Then use the produced time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. 
 
-(And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And to 🇫🇷learn languages🥷!)
+(And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And also to learn languages; e.g., to read along while listening and to precisely one-click jump to lines for repetition/reinforcement.)
 ![Demo](/demos/language.gif)
 
 ### Usage:
