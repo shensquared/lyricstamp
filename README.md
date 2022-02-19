@@ -6,12 +6,12 @@ Play a keyboard game alongside a song/audiobook to convert plain text `.txt` lyr
 ### Usage:
 Run `python3 lyricstamp.py` to call out the 'game' interface. (Currently the `lyrics.txt` is hard-coded to the song "Je Lui Dirai" by "Céline Dion"; automation incoming.)
 
-- Press 'Down-Arrow' to start media playing, and simultaneously reset timer
+- Press 'Down-Arrow' to tell Apple Music to start media playing and simultaneously reset LyricStamp's timer (so the sound/text are auto-aligned at "00:00".)
 - Keep pressing 'Down-Arrow' to go through the lines and to add stamp, one line at a time
 - Press 'Up-Arrow' to go to the previous lines (e.g. to correct a 'jumped the gun')
 - Press 'Enter' to end stamping, and save a `media_title - artist.lrcx` file to your LyricsX folder (where the `media_title` and `artist` are extracted from Music's now playing track properties via AppleScript). Enjoy!
 
-([YouTube Demo](https://youtu.be/qZp7A0i0zl0) (Where the gif below was generated from)
+[YouTube Demo](https://youtu.be/qZp7A0i0zl0) (Where the gif below was generated from)
 ![Demo](/demos/demo.gif) 
 
 #### Tips:
