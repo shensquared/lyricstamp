@@ -34,7 +34,7 @@ def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type
         raise e
 
 
-def screen_banner(screen, text1, text2, y=10):
+def screen_banner(screen, text1, text2):
     color = (255, 000, 000)
     size = 30
     text_to_screen(screen, text1, 20, 10, size=size, color=color)
@@ -66,7 +66,7 @@ def main(in_name="lyrics.txt"):
 
     pygame.init()
     screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption('LyricStamp - ' + out_name)
+    pygame.display.set_caption('LyricStamp: ' + out_name)
     screen.fill(background_colour)
     pygame.display.flip()
 
