@@ -2,11 +2,13 @@ import pygame
 import time
 import os
 import sys
-from player_control import now_playing, play
+from player_control import now_playing, play, play_pause
 
 
-def stamp(begin, end):
-    time = end - begin
+def stamp(begin, end, all_pauses):
+
+    time = end - begin - all_pauses
+    print(time)
     m = str(int(time / 60)).rjust(2, '0')
     s = str(round(time % 60, 3)).rjust(2, '0')
     return "[" + m + ":" + s + "]"
@@ -23,11 +25,12 @@ def save_lyrics(lines, out_name):
 
 # Modified from https://gist.github.com/seankmartin/f660eff4787b586f94d5f678932bcd27
 # TODO: Non-western chars not displaying
-def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type=''):
+def text_to_screen(screen, text, x, y, size=30, color=(000, 000, 000), font_type=['songti', 'hiraginosansgb', 'Palatino']):
     try:
         text = str(text)
-        font = pygame.font.Font(None, size)
-        text = font.render(text, True, color)
+# TODO: Surely there's a better way to handle even mixed languages
+        font = pygame.font.SysFont(font_type, size)
+        text = font.render((text), True, color)
         screen.blit(text, (x, y))
     except Exception as e:
         print('Font Error, saw it coming')
@@ -62,6 +65,7 @@ def main(in_name="lyrics.txt"):
     lines.insert(0, out_name + "\n")
     counter = 0
     background_colour = (255, 255, 255)
+    # TODO: 
     (width, height) = (max([len(i) for i in lines]) * 10, 15 * 25)
 
     pygame.init()
@@ -72,12 +76,23 @@ def main(in_name="lyrics.txt"):
 
     running = True
     clock = pygame.time.Clock()
-
+    all_pauses = 0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and counter>0:
+                    play_pause()
+                    if is_playing:
+                        # start of a pause
+                        pause_start = time.time()
+                    else:
+                        # end of a pause
+                        pause_end = time.time()
+                        all_pauses += (pause_end - pause_start)
+                    is_playing = 1 - is_playing
                 if event.key == pygame.K_DOWN:
-                    print("Current cursor counter is at line: " + str(counter))
+                    is_playing = True
+                    print("Caret is at line: " + str(counter))
                     if counter == 0:
                         play()
                         lines[counter] = "[00:00.000]" + ' ' + lines[counter]
@@ -85,7 +100,7 @@ def main(in_name="lyrics.txt"):
                     elif counter <= len(lines) - 1:
                         # insert new stamp into line
                         now = time.time()
-                        lines[counter] = stamp(begin, now) + ' ' + lines[counter]
+                        lines[counter] = stamp(begin, now, all_pauses) + ' ' + lines[counter]
                     counter += 1
                 if event.key == pygame.K_UP:
                     counter -= 1

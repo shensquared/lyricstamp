@@ -1,6 +1,10 @@
 # https://stackoverflow.com/questions/51775132/how-to-get-return-value-from-applescript-in-python
 from subprocess import Popen, PIPE
 
+def execute(script):
+    proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    result, error = proc.communicate(script)
+    return result
 
 def now_playing():
     titlescript = '''
@@ -14,11 +18,8 @@ def now_playing():
           get artist of current track
           end tell
       '''
-
-    proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    title, error = proc.communicate(titlescript)
-    proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    artist, error = proc.communicate(artistscript)
+    title = execute(titlescript)
+    artist = execute(artistscript)
     return title[:-1], artist[:-1]
 
 
@@ -33,5 +34,13 @@ def play():
         play (previous track)
         end tell
     '''
-    proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    title, error = proc.communicate(playscript)
+    execute(playscript)
+
+def play_pause():
+    script  = '''
+        tell application "Music"
+        playpause
+        end tell
+    '''
+    execute(script)    
+
