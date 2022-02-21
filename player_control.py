@@ -1,10 +1,12 @@
 # https://stackoverflow.com/questions/51775132/how-to-get-return-value-from-applescript-in-python
 from subprocess import Popen, PIPE
 
+
 def execute(script):
     proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     result, error = proc.communicate(script)
     return result
+
 
 def now_playing():
     titlescript = '''
@@ -26,7 +28,7 @@ def now_playing():
 def play():
     # TODO: hacky way to start play right from the beginning. Seems that Apple Music assigns
     # a unique `track id` and also a `persistent ID` for each song.
-    # But couldn't use thse as identifiers to play. Need investiagte
+    # But couldn't use these as identifiers to play. Need investigate
     # further.
     playscript = '''
         tell application "Music"
@@ -36,11 +38,11 @@ def play():
     '''
     execute(playscript)
 
+
 def play_pause():
-    script  = '''
+    script = '''
         tell application "Music"
         playpause
         end tell
     '''
-    execute(script)    
-
+    execute(script)
