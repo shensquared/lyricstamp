@@ -5,17 +5,15 @@ import sys
 import player_control
 
 
-def stamp(begin, end, all_pauses):
-    t = end - begin - all_pauses
-    m = str(int(t / 60)).rjust(2, '0')
-    s = str(round(t % 60, 3)).rjust(2, '0')
-    return "[" + m + ":" + s + "]"
-
-
 def stamp_internal(pos):
     m = str(int((pos) / 60)).rjust(2, '0')
     s = str(round(pos % 60, 3)).rjust(2, '0')
     return "[" + m + ":" + s + "]"
+
+
+def stamp(begin, end, all_pauses):
+    t = end - begin - all_pauses
+    return stamp_internal(t)
 
 
 def save_lyrics(lines, out_name):
@@ -110,12 +108,11 @@ def main(in_name="lyrics.txt", mode=1, font_type=['songti', 'hiraginosansgb', 'P
                         if mode == 1:
                             # use iTunes/Music's internal player's position
                             pos = player_control.player_position()
-                            lines[counter] = stamp_internal(
-                                pos) + ' ' + lines[counter]
+                            s = stamp_internal(pos)
                         else:
                             # use pygame's timer.
-                            lines[counter] = stamp(
-                                begin, now, all_pauses) + ' ' + lines[counter]
+                            s = stamp(begin, now, all_pauses)
+                        lines[counter] = s + ' ' + lines[counter]
                     counter += 1
                 if event.key == pygame.K_UP:
                     counter -= 1

@@ -33,8 +33,7 @@ def play():
     # further.
     playscript = '''
         tell application "Music"
-        play (next track)
-        play (previous track)
+        back track
         end tell
     '''
     execute(playscript)
