@@ -3,7 +3,8 @@ from subprocess import Popen, PIPE
 
 
 def execute(script):
-    proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    proc = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE,
+                 stderr=PIPE, universal_newlines=True)
     result, error = proc.communicate(script)
     return result
 
@@ -46,3 +47,12 @@ def play_pause():
         end tell
     '''
     execute(script)
+
+
+def player_position():
+    script = '''
+        tell application "Music"
+        get player position
+        end tell
+    '''
+    return float(execute(script))

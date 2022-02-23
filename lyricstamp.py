@@ -2,13 +2,19 @@ import pygame
 import time
 import os
 import sys
-from player_control import now_playing, play, play_pause
+import player_control
 
 
 def stamp(begin, end, all_pauses):
-    time = end - begin - all_pauses
-    m = str(int(time / 60)).rjust(2, '0')
-    s = str(round(time % 60, 3)).rjust(2, '0')
+    t = end - begin - all_pauses
+    m = str(int(t / 60)).rjust(2, '0')
+    s = str(round(t % 60, 3)).rjust(2, '0')
+    return "[" + m + ":" + s + "]"
+
+
+def stamp_internal(pos):
+    m = str(int((pos) / 60)).rjust(2, '0')
+    s = str(round(pos % 60, 3)).rjust(2, '0')
     return "[" + m + ":" + s + "]"
 
 
@@ -42,9 +48,11 @@ def screen_banner(screen, text1, text2, font, char_size):
 def print_info(screen, lines, counter, font, char_size, out_name=''):
     for i, l in enumerate(lines):
         if counter - 3 < i < max(counter, 2) + 9:
-            text_to_screen(screen, str(i) + ': ' + l, 20, char_size[1] * (i - max(counter, 2) + 5), font)
+            text_to_screen(screen, str(i) + ': ' + l, 20,
+                           char_size[1] * (i - max(counter, 2) + 5), font)
     if counter == 0:
-        screen_banner(screen, "Press 'Down-Arrow'", "to start the media playing and reset the timer", font, char_size)
+        screen_banner(screen, "Press 'Down-Arrow'",
+                      "to start the media playing and reset the timer", font, char_size)
     elif counter >= len(lines):
         screen_banner(screen, "Press Enter to end stamping and confirm that", out_name + " will be saved", font,
                       char_size)
@@ -53,10 +61,10 @@ def print_info(screen, lines, counter, font, char_size, out_name=''):
                       "'Up-Arrow' to go back to the previous line.", font, char_size)
 
 # TODO: Surely there's a better way to handle even mixed languages...
-def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino']):
+def main(in_name="lyrics.txt", mode=1, font_type=['songti', 'hiraginosansgb', 'Palatino']):
     with open(in_name) as f:
-        lines = f.readlines()
-    title, artist = now_playing()
+        lines = [line for line in f.readlines() if line.strip()]
+    title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
     lines.insert(0, out_name + "\n")
     counter = 0
@@ -65,7 +73,8 @@ def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino'
     pygame.init()
     font = pygame.font.SysFont(font_type, 30)
     char_size = font.size('a')
-    (width, height) = ((max([len(i) for i in lines]) + 10) * char_size[0], 16 * char_size[1])
+    (width, height) = (
+        (max([len(i) for i in lines]) + 10) * char_size[0], 16 * char_size[1])
 
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('LyricStamp: ' + out_name)
@@ -79,7 +88,7 @@ def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino'
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and counter > 0:
-                    play_pause()
+                    player_control.play_pause()
                     if is_playing:
                         # start of a pause
                         pause_start = time.time()
@@ -92,13 +101,21 @@ def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino'
                     is_playing = True
                     print("Caret is at line: " + str(counter))
                     if counter == 0:
-                        play()
+                        player_control.play()
                         lines[counter] = "[00:00.000]" + ' ' + lines[counter]
                         begin = time.time()
                     elif counter <= len(lines) - 1:
                         # insert new stamp into line
                         now = time.time()
-                        lines[counter] = stamp(begin, now, all_pauses) + ' ' + lines[counter]
+                        if mode == 1:
+                            # use iTunes/Music's internal player's position
+                            pos = player_control.player_position()
+                            lines[counter] = stamp_internal(
+                                pos) + ' ' + lines[counter]
+                        else:
+                            # use pygame's timer.
+                            lines[counter] = stamp(
+                                begin, now, all_pauses) + ' ' + lines[counter]
                     counter += 1
                 if event.key == pygame.K_UP:
                     counter -= 1
