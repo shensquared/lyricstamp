@@ -64,3 +64,12 @@ def set_player_position(pos):
         end tell
     ''' %pos
     return execute(s)
+
+def play_next():
+    s = '''
+        tell application "Music"
+            next track
+            play
+        end tell
+    '''
+    return execute(s)

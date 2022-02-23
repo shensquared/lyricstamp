@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 import player_control
-
+from get_lyricstexts import get_texts
 
 def stamp_internal(pos):
     m = str(int((pos) / 60)).rjust(2, '0')
@@ -53,11 +53,15 @@ def print_info(screen, lines, counter, font, char_size, out_name=''):
                       "'Up-Arrow' to go back to the previous line.", font, char_size)
 
 # TODO: Surely there's a better way to handle even mixed languages...
-def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino']):
-    with open(in_name) as f:
-        lines = [line for line in f.readlines() if line.strip()]
+def main(use_genius=True, font_type=['songti', 'hiraginosansgb', 'Palatino']):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
+
+    if use_genius:
+        lines = get_texts(title, artist)
+    else:
+        with open("lyrics.txt") as f:
+            lines = [line for line in f.readlines() if line.strip()]
     lines.insert(0, out_name + "\n")
     counter = 0
     secs = [0]
@@ -79,6 +83,9 @@ def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino'
     while running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    player_control.play_next()
+                    main()
                 if event.key == pygame.K_SPACE and counter > 0:
                     player_control.play_pause()
                 if event.key == pygame.K_DOWN:
@@ -104,17 +111,18 @@ def main(in_name="lyrics.txt", font_type=['songti', 'hiraginosansgb', 'Palatino'
                             player_control.set_player_position(secs[-1])
                     except:
                         pass
-                if event.key == pygame.K_RETURN and counter >= len(lines):
-                    save_lyrics(lines, out_name)
-                    running = False
-                    pygame.quit()
-                    break
+                if counter >= len(lines):
+                    if event.key == pygame.K_RETURN:
+                        save_lyrics(lines, out_name)
+                        # running = False
+                        # pygame.quit()
+                        # break
                 if event.key == pygame.K_ESCAPE:
                     return
             screen.fill(background_colour)
             print_info(screen, lines, counter, font, char_size, out_name)
             pygame.display.update()
-            clock.tick(40)
+            clock.tick(10)
 
 
 if __name__ == "__main__":
