@@ -34,6 +34,7 @@ def play():
     playscript = '''
         tell application "Music"
         back track
+        play
         end tell
     '''
     execute(playscript)
@@ -55,3 +56,11 @@ def player_position():
         end tell
     '''
     return float(execute(script))
+
+def set_player_position(pos):
+    s = '''
+        tell application "Music"
+            set player position to %s
+        end tell
+    ''' %pos
+    return execute(s)

@@ -66,6 +66,7 @@ def main(in_name="lyrics.txt", mode=1, font_type=['songti', 'hiraginosansgb', 'P
     out_name = title + ' - ' + artist
     lines.insert(0, out_name + "\n")
     counter = 0
+    secs = [0]
     # Setup interface
     background_colour = (255, 255, 255)
     pygame.init()
@@ -97,7 +98,7 @@ def main(in_name="lyrics.txt", mode=1, font_type=['songti', 'hiraginosansgb', 'P
                     is_playing = 1 - is_playing
                 if event.key == pygame.K_DOWN:
                     is_playing = True
-                    print("Caret is at line: " + str(counter))
+                    # print("Caret is at line: " + str(counter))
                     if counter == 0:
                         player_control.play()
                         lines[counter] = "[00:00.000]" + ' ' + lines[counter]
@@ -108,17 +109,21 @@ def main(in_name="lyrics.txt", mode=1, font_type=['songti', 'hiraginosansgb', 'P
                         if mode == 1:
                             # use iTunes/Music's internal player's position
                             pos = player_control.player_position()
+                            secs.append(pos)
                             s = stamp_internal(pos)
                         else:
                             # use pygame's timer.
                             s = stamp(begin, now, all_pauses)
                         lines[counter] = s + ' ' + lines[counter]
                     counter += 1
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP or event.key == pygame.K_LEFT:
                     counter -= 1
                     try:
                         # remove the old/wrong timestamp
                         lines[counter] = " ".join(lines[counter].split(']')[1:])[1:]
+                        if event.key == pygame.K_UP:
+                            secs.pop()
+                            player_control.set_player_position(secs[-1])
                     except:
                         pass
                 if event.key == pygame.K_RETURN and counter >= len(lines):
