@@ -4,6 +4,7 @@ import argparse
 import player_control
 from get_lyricstexts import get_texts
 
+
 def stamp_internal(pos):
     m = str(int((pos) / 60)).rjust(2, '0')
     s = str(round(pos % 60, 3)).rjust(2, '0')
@@ -52,25 +53,29 @@ def print_info(screen, lines, counter, font, char_size, out_name=''):
         screen_banner(screen, "Press 'Down-Arrow' to go to the next line",
                       "'Up-Arrow' to go back to the previous line.", font, char_size)
 
+
 # TODO: Surely there's a better way to handle even mixed languages...
-def main(fetch, in_name, lang, font_type=['songti', 'hiraginosansgb', 'Palatino'], screen=None):
+def main(in_name, screen=None):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
 
-    if fetch:
-        lines = get_texts(title, artist)
-    else:
+    if in_name:
         with open(in_name) as f:
             lines = [line for line in f.readlines() if line.strip()]
+    else:
+        lines = get_texts(title, artist)
+
     lines.insert(0, out_name + "\n")
     counter = 0
     secs = [0]
-    
+
     if not screen:
         pygame.init()
     # Setup interface
     background_colour = (255, 255, 255)
-    font = pygame.font.SysFont(font_type, 30)
+    font = pygame.font.Font('fonts/NotoSansCJK-Light.ttc', 30)
+    # seems that CJK fonts have a pretty good coverage of western chars. Hard-code for now.
+    # font = pygame.font.Font('fonts/NotoSerifDisplay-Light.ttf', 30)
     char_size = font.size('a')
     (width, height) = (
         (max([len(i) for i in lines]) + 10) * char_size[0], 16 * char_size[1])
@@ -86,7 +91,7 @@ def main(fetch, in_name, lang, font_type=['songti', 'hiraginosansgb', 'Palatino'
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
                     player_control.play_next()
-                    main(fetch, in_name, lang, screen=screen)
+                    main(in_name, screen=screen)
                 if event.key == pygame.K_SPACE and counter > 0:
                     player_control.play_pause()
                 if event.key == pygame.K_DOWN:
@@ -128,13 +133,11 @@ def main(fetch, in_name, lang, font_type=['songti', 'hiraginosansgb', 'Palatino'
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=""".""")
-    parser.add_argument("--fetch", help="if use e.g. genius.com to fetch lyrics")
-    parser.add_argument("--in_name", help="local file to read static lyrics from")
-    parser.add_argument("--lang", help="language the song/book is in. Currently supports US, CN, FR, JR.")
+    parser.add_argument("--in_name",
+                        help="local file to read static lyrics from; if none supplied, fetch from e.g. genius.com")
+    # parser.add_argument("--lang",
+    #                     help="if the song/book is in Chinese (use CN), Japanese (use JP), or Korean (use KR).")
     args = parser.parse_args()
-    fetch = args.fetch.lower()=='true'
     in_name = args.in_name
-    if not in_name:
-        in_name = 'lyrics.txt'
-    lang = args.lang
-    main(fetch, in_name, lang)
+    # lang = args.lang
+    main(in_name)
