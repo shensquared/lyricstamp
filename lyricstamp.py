@@ -1,6 +1,6 @@
 import pygame
 import os
-import sys
+import argparse
 import player_control
 from get_lyricstexts import get_texts
 
@@ -53,26 +53,27 @@ def print_info(screen, lines, counter, font, char_size, out_name=''):
                       "'Up-Arrow' to go back to the previous line.", font, char_size)
 
 # TODO: Surely there's a better way to handle even mixed languages...
-def main(use_genius=True, font_type=['songti', 'hiraginosansgb', 'Palatino']):
+def main(fetch, in_name, lang, font_type=['songti', 'hiraginosansgb', 'Palatino'], screen=None):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
 
-    if use_genius:
+    if fetch:
         lines = get_texts(title, artist)
     else:
-        with open("lyrics.txt") as f:
+        with open(in_name) as f:
             lines = [line for line in f.readlines() if line.strip()]
     lines.insert(0, out_name + "\n")
     counter = 0
     secs = [0]
+    
+    if not screen:
+        pygame.init()
     # Setup interface
     background_colour = (255, 255, 255)
-    pygame.init()
     font = pygame.font.SysFont(font_type, 30)
     char_size = font.size('a')
     (width, height) = (
         (max([len(i) for i in lines]) + 10) * char_size[0], 16 * char_size[1])
-
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('LyricStamp: ' + out_name)
     screen.fill(background_colour)
@@ -85,7 +86,7 @@ def main(use_genius=True, font_type=['songti', 'hiraginosansgb', 'Palatino']):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
                     player_control.play_next()
-                    main()
+                    main(fetch, in_name, lang, screen=screen)
                 if event.key == pygame.K_SPACE and counter > 0:
                     player_control.play_pause()
                 if event.key == pygame.K_DOWN:
@@ -126,5 +127,14 @@ def main(use_genius=True, font_type=['songti', 'hiraginosansgb', 'Palatino']):
 
 
 if __name__ == "__main__":
-    # in_name = sys.argv[0]
-    main()
+    parser = argparse.ArgumentParser(description=""".""")
+    parser.add_argument("--fetch", help="if use e.g. genius.com to fetch lyrics")
+    parser.add_argument("--in_name", help="local file to read static lyrics from")
+    parser.add_argument("--lang", help="language the song/book is in. Currently supports US, CN, FR, JR.")
+    args = parser.parse_args()
+    fetch = args.fetch.lower()=='true'
+    in_name = args.in_name
+    if not in_name:
+        in_name = 'lyrics.txt'
+    lang = args.lang
+    main(fetch, in_name, lang)
