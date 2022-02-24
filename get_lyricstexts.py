@@ -1,5 +1,6 @@
 import lyricsgenius
 
+
 def get_texts(title, artist):
     try:
         genius = lyricsgenius.Genius()
@@ -7,6 +8,8 @@ def get_texts(title, artist):
         print('Genius API Token not found; check out https://pypi.org/project/lyricsgenius/ usage')
         raise e
     clean_title = title.split('(')[0]
+    # TODO: if song returns None, should have an easy back-up. Was thinking of poping up a paste bin via pygame to
+    #  dump the texts; seems a bit difficult. Alternatively, paste over in terminal.
     song = genius.search_song(clean_title, artist)
     l = song.lyrics
     # TODO: clean up text format

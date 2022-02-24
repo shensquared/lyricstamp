@@ -20,8 +20,7 @@ def save_lyrics(lines, out_name):
     print('Saved ' + out_name + ' in ' + path)
 
 
-# Modified from https://gist.github.com/seankmartin/f660eff4787b586f94d5f678932bcd27
-# TODO: Non-western chars not displaying
+# TODO: add a cursor here https://pygame.readthedocs.io/en/latest/4_text/text.html#initialize-a-font
 def text_to_screen(screen, text, x, y, font, color=(0, 0, 0)):
     try:
         text = str(text)
@@ -54,18 +53,17 @@ def print_info(screen, lines, counter, font, char_size, out_name=''):
                       "'Up-Arrow' to go back to the previous line.", font, char_size)
 
 
-# TODO: Surely there's a better way to handle even mixed languages...
 def main(in_name, screen=None):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
 
     if in_name:
         with open(in_name) as f:
-            lines = [line for line in f.readlines() if line.strip()]
+            lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
     else:
         lines = get_texts(title, artist)
 
-    lines.insert(0, out_name + "\n")
+    lines.insert(0, out_name)
     counter = 0
     secs = [0]
 
@@ -75,10 +73,10 @@ def main(in_name, screen=None):
     background_colour = (255, 255, 255)
     font = pygame.font.Font('fonts/NotoSansCJK-Light.ttc', 30)
     # seems that CJK fonts have a pretty good coverage of western chars. Hard-code for now.
+    # TODO: check e.g. Korean and Spanish
     # font = pygame.font.Font('fonts/NotoSerifDisplay-Light.ttf', 30)
-    char_size = font.size('a')
-    (width, height) = (
-        (max([len(i) for i in lines]) + 10) * char_size[0], 16 * char_size[1])
+    space = font.size('A')
+    (width, height) = ((max([len(i) for i in lines]) + 10) * space[0], 16 * space[1])
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('LyricStamp: ' + out_name)
     screen.fill(background_colour)
@@ -126,7 +124,7 @@ def main(in_name, screen=None):
                 if event.key == pygame.K_ESCAPE:
                     return
             screen.fill(background_colour)
-            print_info(screen, lines, counter, font, char_size, out_name)
+            print_info(screen, lines, counter, font, space, out_name)
             pygame.display.update()
             clock.tick(10)
 
