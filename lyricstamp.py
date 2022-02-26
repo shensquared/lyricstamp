@@ -2,7 +2,14 @@ import pygame
 import os
 import argparse
 import player_control
+# import time
+# import re
 from get_lyricstexts import get_texts
+from phonetics import add_phonetics
+
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+WHITE = (200, 200, 200)
 
 
 def stamp_internal(pos):
@@ -11,81 +18,66 @@ def stamp_internal(pos):
     return "[" + m + ":" + s + "]"
 
 
-def save_lyrics(lines, out_name):
+def save_lyrics(lines, stamps, out_name):
     home = os.path.expanduser("~")
     path = home + '/Music/LyricsX'
     out_name += '.lrcx'
     with open(os.path.join(path, out_name), "w") as f:
-        [f.write(i) for i in lines]
+        [f.write(i + j + '\n') for (i, j) in zip(stamps, lines)]
     print('Saved ' + out_name + ' in ' + path)
 
 
 # TODO: add a cursor here https://pygame.readthedocs.io/en/latest/4_text/text.html#initialize-a-font
-def text_to_screen(screen, text, x, y, font, color=(0, 0, 0)):
+def text_to_screen(screen, text, x, y, font, color=BLACK):
     try:
-        text = str(text)
         text = font.render(text, True, color)
         screen.blit(text, (x, y))
     except Exception as e:
-        print('Font Error, saw it coming')
         raise e
 
 
-def screen_banner(screen, text1, text2, font, char_size):
-    color = (255, 000, 000)
-    text_to_screen(screen, text1, 20, 10, font, color=color)
-    text_to_screen(screen, text2, 20, 10 + char_size[1], font, color=color)
+def screen_banner(screen, text1, text2, font, space):
+    text_to_screen(screen, text1, 20, 10, font, color=RED)
+    text_to_screen(screen, text2, 20, 10 + space[1], font, color=RED)
 
 
-def print_info(screen, lines, counter, font, char_size, out_name=''):
-    for i, l in enumerate(lines):
-        if counter - 3 < i < max(counter, 2) + 9:
-            text_to_screen(screen, str(i) + ': ' + l, 20,
-                           char_size[1] * (i - max(counter, 2) + 5), font)
-    if counter == 0:
-        screen_banner(screen, "Press 'Down-Arrow'",
-                      "to start the media playing and reset the timer", font, char_size)
-    elif counter >= len(lines):
-        screen_banner(screen, "Press Enter to end stamping and confirm that", out_name + " will be saved", font,
-                      char_size)
-    else:
-        screen_banner(screen, "Press 'Down-Arrow' to go to the next line",
-                      "'Up-Arrow' to go back to the previous line.", font, char_size)
-
-
-def main(in_name, screen=None):
+def main(in_name='lyrics.txt', screen=None, phonectics=False):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
-
+    # in_name = 'lyrics.txt'
     if in_name:
         with open(in_name) as f:
             lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
     else:
         lines = get_texts(title, artist)
-
+    if phonectics:
+        lines = add_phonetics(lines)
     lines.insert(0, out_name)
     counter = 0
-    secs = [0]
+    secs = [0] * len(lines)
+    stamps = [''] * len(lines)
 
     if not screen:
         pygame.init()
     # Setup interface
-    background_colour = (255, 255, 255)
     font = pygame.font.Font('fonts/NotoSansCJK-Light.ttc', 30)
     # seems that CJK fonts have a pretty good coverage of western chars. Hard-code for now.
     # TODO: check e.g. Korean and Spanish
     # font = pygame.font.Font('fonts/NotoSerifDisplay-Light.ttf', 30)
     space = font.size('A')
-    (width, height) = ((max([len(i) for i in lines]) + 10) * space[0], 16 * space[1])
+    num_chars = (max([len(i) for i in lines]) + 10)
+    (width, height) = (num_chars * space[0], 16 * space[1])
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('LyricStamp: ' + out_name)
-    screen.fill(background_colour)
+    screen.fill(WHITE)
     pygame.display.flip()
 
     running = True
     clock = pygame.time.Clock()
     while running:
         for event in pygame.event.get():
+            # if event.type==pygame.DROPFILE:
+            #     (event.file)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
                     player_control.play_next()
@@ -93,38 +85,60 @@ def main(in_name, screen=None):
                 if event.key == pygame.K_SPACE and counter > 0:
                     player_control.play_pause()
                 if event.key == pygame.K_DOWN:
-                    is_playing = True
-                    # print("Caret is at line: " + str(counter))
                     if counter == 0:
-                        player_control.play()
-                        lines[counter] = "[00:00.000]" + ' ' + lines[counter]
+                        stamps[counter] = "[00:00.000]"
+                        # player_control.play()
                     elif counter <= len(lines) - 1:
                         # insert new stamp into line; relies on iTunes/Music's internal player's position
                         pos = player_control.player_position()
-                        secs.append(pos)
-                        s = stamp_internal(pos)
-                        lines[counter] = s + ' ' + lines[counter]
+                        secs[counter] = pos
+                        stamps[counter] = stamp_internal(pos)
+                        if counter <= len(lines) - 2 and lines[counter + 1].startswith('[tr]'):
+                            counter += 1
+                            secs[counter] = pos
+                            stamps[counter] = stamp_internal(pos)
                     counter += 1
                 if event.key == pygame.K_UP or event.key == pygame.K_LEFT:
                     counter -= 1
-                    try:
-                        # remove the old/wrong timestamp
-                        lines[counter] = " ".join(lines[counter].split(']')[1:])[1:]
-                        if event.key == pygame.K_UP:
-                            secs.pop()
-                            player_control.set_player_position(secs[-1])
-                    except:
-                        pass
+                    secs[counter] = 0
+                    stamps[counter] = ''
+                    if counter >= 0 and lines[counter].startswith('[tr]'):
+                        counter -= 1
+                        secs[counter] = 0
+                        stamps[counter] = ''
+                    if event.key == pygame.K_UP:
+                        player_control.set_player_position(secs[counter - 1])
                 if counter >= len(lines):
                     if event.key == pygame.K_RETURN:
-                        save_lyrics(lines, out_name)
+                        save_lyrics(lines, stamps, out_name)
+                        screen.fill(WHITE)
                         # running = False
                         # pygame.quit()
                         # break
                 if event.key == pygame.K_ESCAPE:
                     return
-            screen.fill(background_colour)
-            print_info(screen, lines, counter, font, space, out_name)
+            screen.fill(WHITE)
+
+            def print_info():
+                for i, l in enumerate(lines):
+                    if i == counter - 1:
+                        c = RED
+                    else:
+                        c = BLACK
+                    if counter - 3 < i < max(counter, 2) + 9:
+                        text_to_screen(screen, str(i) + ': ' + stamps[i] + l, 20, space[1] * (i - max(counter, 2) + 5),
+                                       font, color=c)
+                if counter == 0:
+                    screen_banner(screen, "Press 'Down-Arrow'",
+                                  "to start the media playing and reset the timer", font, space)
+                elif counter >= len(lines):
+                    screen_banner(screen, "Press Enter to end stamping and confirm that", out_name + " will be saved",
+                                  font, space)
+                else:
+                    screen_banner(screen, "Press 'Down-Arrow' to go to the next line",
+                                  "'Up-Arrow' to go back to the previous line.", font, space)
+
+            print_info()
             pygame.display.update()
             clock.tick(10)
 
