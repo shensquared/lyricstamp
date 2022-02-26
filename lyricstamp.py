@@ -9,8 +9,8 @@ from phonetics import add_phonetics
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-WHITE = (200, 200, 200)
-
+GRAY = (200, 200, 200)
+# WHITE=(255,255,255)
 
 def stamp_internal(pos):
     m = str(int((pos) / 60)).rjust(2, '0')
@@ -41,10 +41,10 @@ def screen_banner(screen, text1, text2, font, space):
     text_to_screen(screen, text2, 20, 10 + space[1], font, color=RED)
 
 
-def main(in_name='lyrics.txt', screen=None, phonectics=False):
+def main(in_name='lyrics.txt', screen=None, phonectics=True):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
-    # in_name = 'lyrics.txt'
+    in_name = 'lyrics.txt'
     if in_name:
         with open(in_name) as f:
             lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
@@ -69,7 +69,7 @@ def main(in_name='lyrics.txt', screen=None, phonectics=False):
     (width, height) = (num_chars * space[0], 16 * space[1])
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('LyricStamp: ' + out_name)
-    screen.fill(WHITE)
+    screen.fill(GRAY)
     pygame.display.flip()
 
     running = True
@@ -111,13 +111,13 @@ def main(in_name='lyrics.txt', screen=None, phonectics=False):
                 if counter >= len(lines):
                     if event.key == pygame.K_RETURN:
                         save_lyrics(lines, stamps, out_name)
-                        screen.fill(WHITE)
+                        screen.fill(GRAY)
                         # running = False
                         # pygame.quit()
                         # break
                 if event.key == pygame.K_ESCAPE:
                     return
-            screen.fill(WHITE)
+            screen.fill(GRAY)
 
             def print_info():
                 for i, l in enumerate(lines):
