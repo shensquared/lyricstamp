@@ -2,7 +2,7 @@ import pygame
 import os
 import argparse
 import player_control
-# import time
+import time
 # import re
 from get_lyricstexts import get_texts
 from phonetics import add_phonetics
@@ -46,7 +46,6 @@ def get_song_info(phonectics):
 
 
 def print_info(screen, counter, lines, stamps, out_name, font):
-    # TODO: add a cursor here https://pygame.readthedocs.io/en/latest/4_text/text.html#initialize-a-font
     def text_to_screen(text, y, color):
         try:
             text = font.render(text, True, color)
@@ -59,19 +58,22 @@ def print_info(screen, counter, lines, stamps, out_name, font):
         [text_to_screen(j, 10 + i * space[1], RED) for (i, j) in enumerate(vargs)]
 
     space = font.size('A')
+    h = space[1]
+    if lines[counter + 1].startswith('[tr]'):
+        h = 2 * h
+    cursor = pygame.Rect((20 + 3.5 * space[0], space[1] * (counter - max(counter, 2) + 5) + 2), (3, h))
+
     for i, l in enumerate(lines):
-        if i == counter - 1:
-            c = RED
-        else:
-            c = BLACK
         if counter - 3 < i < max(counter, 2) + 9:
-            text_to_screen(str(i) + ': ' + stamps[i] + l, space[1] * (i - max(counter, 2) + 5), c)
+            y = space[1] * (i - max(counter, 2) + 5)
+            text_to_screen(str(i).zfill(3) + ': ' + stamps[i] + l, y, BLACK)
     # if counter == 0:
     #     screen_banner("Press 'Down-Arrow'", "to start the media playing and reset t")
     if counter >= len(lines):
         screen_banner("Press Enter to end stamping and confirm that", out_name + " will be saved")
     else:
         screen_banner("Press 'Down-Arrow' to go to the next line", "'Up-Arrow' to go back to the previous line.")
+    return cursor
 
 
 def main(in_name='lyrics.txt', phonectics=True):
@@ -135,10 +137,12 @@ def main(in_name='lyrics.txt', phonectics=True):
                         screen.fill(GRAY)
                 if event.key == pygame.K_ESCAPE:
                     return
-            screen.fill(GRAY)
-            print_info(screen, counter, lines, stamps, out_name, font)
-            pygame.display.update()
-            clock.tick(10)
+        screen.fill(GRAY)
+        cursor = print_info(screen, counter, lines, stamps, out_name, font)
+        if time.time() % 1 > 0.5:
+            pygame.draw.rect(screen, RED, cursor)
+        pygame.display.update()
+        clock.tick(10)
 
 
 if __name__ == "__main__":
