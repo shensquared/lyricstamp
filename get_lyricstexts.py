@@ -11,6 +11,8 @@ def get_texts(title, artist):
     # TODO: if song returns None, should have an easy back-up. Was thinking of poping up a paste bin via pygame to
     #  dump the texts; seems a bit difficult. Alternatively, paste over in terminal.
     song = genius.search_song(clean_title, artist)
+    if not song:
+        return
     l = song.lyrics
     # TODO: clean up text format. Cleaned, but why were these so ugly added anyway?
     # remove the song title
@@ -19,7 +21,7 @@ def get_texts(title, artist):
     else:
         l = l.replace(song.title, '')
     # remove the prefix word 'Lyrics'
-    l=l[7:]
+    l = l[7:]
     if l.endswith('Embed'):
         l = l.replace('Embed', '')
 
