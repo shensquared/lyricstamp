@@ -24,7 +24,9 @@ def get_texts(title, artist):
     l = l[7:]
     if l.endswith('Embed'):
         l = l.replace('Embed', '')
+    return cleanup(l)
 
+def cleanup(l):
     lines = l.split('\n')
     lines = [line for line in lines if line.strip()]
     return lines
