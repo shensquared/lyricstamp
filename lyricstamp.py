@@ -4,7 +4,8 @@ import os
 # import argparse
 import player_control
 import time
-from get_lyricstexts import get_texts, cleanup
+# clean up get_texts
+from get_lyricstexts import get_texts, cleanup, musicsmatch
 from phonetics import add_phonetics
 
 BLACK = (0, 0, 0)
@@ -74,7 +75,9 @@ def print_info(screen, counter, lines, stamps, out_name, font):
         welcome_msg = ["Let's get the lyrics. A few ways to do that:",
                        "",
                        "",
-                       "- Press Right Arrow ➡ and we'll try fetch it from the internet.",
+                       # TODO, streamline below
+                       "- Press Right Arrow ➡ and we'll try fetch it from Genius.com.",
+                       "- Press M and we'll try fetch from Musixmatch.com",
                        "- Press Enter and we'll get the lyrics from your clipboard.",
                        "- Drop a text file into this window and we'll read it."]
         screen_banner(*welcome_msg)
@@ -131,24 +134,24 @@ def main():
                 running = False
             # source selection page
             if counter == -2:
-                if e.type == pg.KEYDOWN and e.key == pg.K_RETURN:
+                if e.type == pg.KEYDOWN and (e.key == pg.K_RETURN or e.key == pg.K_m):
                     # Initialize the scrap module and use the clipboard mode.
                     scrap.init()
                     scrap.set_mode(pg.SCRAP_CLIPBOARD)
                     for t in scrap.get_types():
                         r = scrap.get(t)
                         clipboard = (r.decode('UTF-8'))
-                        lines = cleanup(clipboard)
-                    # out_name, lines, secs, stamps, screen = get_song_info(p, t=clipboard)
+                        if e.key == pg.K_RETURN:
+                            lines = cleanup(clipboard)
+                        else:
+                            lines = musicsmatch(clipboard)
                     counter = -1
                 if e.type == pg.DROPFILE:
                     in_name = e.file
                     with open(in_name) as f:
                         lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
-                    # out_name, lines, secs, stamps, screen = get_song_info(p, t = in_name)
                     counter = -1
                 if e.type == pg.KEYDOWN and e.key == pg.K_RIGHT:
-                    # out_name, lines, secs, stamps, screen = get_song_info(p)
                     counter = -1
             # phonetics page
             elif counter == -1:
