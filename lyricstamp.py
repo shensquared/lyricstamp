@@ -1,15 +1,16 @@
-import pygame
+import pygame as pg
+import pygame.scrap as scrap
 import os
-import argparse
+# import argparse
 import player_control
 import time
-# import re
-from get_lyricstexts import get_texts
+from get_lyricstexts import get_texts, cleanup
 from phonetics import add_phonetics
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GRAY = (200, 200, 200)
+space = (18, 44)
 
 
 def stamp_internal(pos):
@@ -27,31 +28,31 @@ def save_lyrics(lines, stamps, out_name):
     print('Saved ' + out_name + ' in ' + path)
 
 
-def get_song_info(p, space, counter):
-    if counter == -2:
-        out_name = ''
-        lines = ['']
-        secs = ['']
-        stamps = ['']
-        width, height = (800, 600)
-    else:
-        title, artist = player_control.now_playing()
-        out_name = title + ' - ' + artist
-        in_name = 'lyrics.txt'
-        if in_name:
-            with open(in_name) as f:
-                lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
-        else:
-            lines = get_texts(title, artist)
+def welcome():
+    out_name = ''
+    lines = ['']
+    secs = ['']
+    stamps = ['']
+    width, height = (1200, 900)
+    screen = pg.display.set_mode((width, height))
+    pg.display.set_caption('LyricStamp: ' + out_name)
+    return out_name, lines, secs, stamps, screen
 
-        lines = add_phonetics(lines, p)
-        lines.insert(0, out_name)
-        secs = [0] * len(lines)
-        stamps = [''] * len(lines)
-        num_chars = (max([len(i) for i in lines]) + 10)
-        (width, height) = (num_chars * space[0], 16 * space[1])
-    screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption('LyricStamp: ' + out_name)
+
+def get_song_info(p, lines=None):
+    title, artist = player_control.now_playing()
+    out_name = title + ' - ' + artist
+    if not lines:
+        lines = get_texts(title, artist)
+
+    lines = add_phonetics(lines, p)
+    lines.insert(0, out_name)
+    secs = [0] * len(lines)
+    stamps = [''] * len(lines)
+    num_chars = (max([len(i) for i in lines]) + 10)
+    (width, height) = (max(1200, num_chars * space[0]), max(16 * space[1], 900))
+    screen = pg.display.set_mode((width, height))
+    pg.display.set_caption('LyricStamp: ' + out_name)
     return out_name, lines, secs, stamps, screen
 
 
@@ -67,22 +68,19 @@ def print_info(screen, counter, lines, stamps, out_name, font):
     def screen_banner(*vargs):
         [text_to_screen(j, 10 + k * space[1], RED) for (k, j) in enumerate(vargs)]
 
-    space = font.size('A')
     h = space[1]
-
-    if counter == -1:
-        welcome_msg = ["Now let's get the lyrics",
-                       "Or, drop a text file into this window for ",
+    cursor = None
+    if counter == -2:
+        welcome_msg = ["Let's get the lyrics. A few ways to do that:",
                        "",
                        "",
-                       "Supported phonetics:",
-                       "-Romaji for Japanese (type in 'J')",
-                       "-Jyutping for Cantonese (type in 'Y')"]
-        # n = len(welcome_msg)
+                       "- Press Right Arrow ➡ and we'll try fetch it from the internet.",
+                       "- Press Enter and we'll get the lyrics from your clipboard.",
+                       "- Drop a text file into this window and we'll read it."]
         screen_banner(*welcome_msg)
-        cursor = pygame.Rect((50 + 3.5 * space[0], h * 10), (3, h))
+        # cursor = pg.Rect((50 + 3.5 * space[0], h * 10), (3, h))
 
-    elif counter == -2:
+    elif counter == -1:
         welcome_msg = ["Type in the language code if wanna phonetics added.",
                        "Press the Right Arrow ➡ to skip",
                        "",
@@ -90,65 +88,89 @@ def print_info(screen, counter, lines, stamps, out_name, font):
                        "Supported phonetics:",
                        "-Romaji for Japanese (type in 'J')",
                        "-Jyutping for Cantonese (type in 'Y')"]
-        # n = len(welcome_msg)
         screen_banner(*welcome_msg)
-        cursor = pygame.Rect((50 + 3.5 * space[0], h * 10), (3, h))
-    else:
-        topleft = (20 + 3.5 * space[0], h * (counter - max(counter, 2)+5.3))
+        # cursor = pg.Rect((50 + 3.5 * space[0], h * 10), (3, h))
+    elif 0 <= counter <= len(lines) - 2:
+        screen_banner("Press Down-Arrow ⬇ to go to the next line,",
+                      "Left arrow ⬅ to erase the stamp of the current line,",
+                      "Up Arrow ⬆ to go back to the stamp of the previous line")
+        topleft = (20 + 3.5 * space[0], h * (counter - max(counter, 2) + 6.3))
         if lines[counter + 1].startswith('[tr]'):
             h = 2 * h
-        cursor = pygame.Rect(topleft, (3, h*.9))
+        cursor = pg.Rect(topleft, (3, h * .9))
         for i, l in enumerate(lines):
             if counter - 3 < i < max(counter, 2) + 9:
-                y = space[1] * (i - max(counter, 2) + 5)
-                text_to_screen(str(i).zfill(3) + ': ' + stamps[i] + l, y, BLACK)
-        if counter >= len(lines):
-            screen_banner("Press Enter to end stamping and confirm that", out_name + " will be saved")
-        else:
-            screen_banner("Press 'Down-Arrow' to go to the next line", "'Up-Arrow' to go back to the previous line.")
+                yy = space[1] * (i - max(counter, 2) + 6)
+                text_to_screen(str(i).zfill(3) + ': ' + stamps[i] + l, yy, BLACK)
+    if counter >= len(lines) - 1:
+        screen_banner("Press Enter to end stamping and confirm that", out_name + " will be saved")
     return cursor
 
 
-def main(in_name='lyrics.txt'):
-    pygame.init()
-    font = pygame.font.Font('fonts/NotoSansCJK-Light.ttc', 30)
+def main():
+    pg.init()
+    font = pg.font.Font('fonts/NotoSansCJK-Light.ttc', 30)
     # seems that CJK fonts have a pretty good coverage of western chars. Hard-code for now.
     # TODO: check e.g. Korean and Spanish
-    # font = pygame.font.Font('fonts/NotoSerifDisplay-Light.ttf', 30)
-    space = font.size('A')
-    p = None
+    # font = pg.font.Font('fonts/NotoSerifDisplay-Light.ttf', 30)
+    # counter:
+    # -2: Choose the source of text lyrics
+    # -1: Choose if to add phonetics
+    # ≥0: Adding stamps
     counter = -2
-    out_name, lines, secs, stamps, screen = get_song_info(p, space, counter)
+    out_name, lines, secs, stamps, screen = welcome()
     screen.fill(GRAY)
-    pygame.display.flip()
+    pg.display.flip()
 
     running = True
-    clock = pygame.time.Clock()
+    clock = pg.time.Clock()
 
     while running:
-        for event in pygame.event.get():
-            # if event.type==pygame.DROPFILE:
-            #     (event.file)
-            if event.type == pygame.KEYDOWN:
-                if counter == -2:
-                    if event.key == pygame.K_j:
-                        p = 'J'
-                    if event.key == pygame.K_y:
-                        p = 'Y'
-                    counter += 1
-                if counter == -1:
-                    out_name, lines, secs, stamps, screen = get_song_info(p, space, counter)
-                    pygame.display.set_caption('LyricStamp: ' + out_name)
-                    if event.key == pygame.K_RETURN:
-                        counter=0
-                if counter >= 0:
-                    if event.key == pygame.K_RIGHT:
+        for e in pg.event.get():
+            if e.type == pg.QUIT or (e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE):
+                running = False
+            # source selection page
+            if counter == -2:
+                if e.type == pg.KEYDOWN and e.key == pg.K_RETURN:
+                    # Initialize the scrap module and use the clipboard mode.
+                    scrap.init()
+                    scrap.set_mode(pg.SCRAP_CLIPBOARD)
+                    for t in scrap.get_types():
+                        r = scrap.get(t)
+                        clipboard = (r.decode('UTF-8'))
+                        lines = cleanup(clipboard)
+                    # out_name, lines, secs, stamps, screen = get_song_info(p, t=clipboard)
+                    counter = -1
+                if e.type == pg.DROPFILE:
+                    in_name = e.file
+                    with open(in_name) as f:
+                        lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
+                    # out_name, lines, secs, stamps, screen = get_song_info(p, t = in_name)
+                    counter = -1
+                if e.type == pg.KEYDOWN and e.key == pg.K_RIGHT:
+                    # out_name, lines, secs, stamps, screen = get_song_info(p)
+                    counter = -1
+            # phonetics page
+            elif counter == -1:
+                if e.type == pg.KEYDOWN:
+                    if e.key == pg.K_j:
+                        out_name, lines, secs, stamps, screen = get_song_info('J', lines=lines)
+                        counter = 0
+                    if e.key == pg.K_y:
+                        out_name, lines, secs, stamps, screen = get_song_info('Y', lines=lines)
+                        counter = 0
+                    if e.key == pg.K_RIGHT:
+                        out_name, lines, secs, stamps, screen = get_song_info(None)
+                        counter = 0
+            elif counter >= 0:
+                if e.type == pg.KEYDOWN:
+                    if e.key == pg.K_RIGHT:
                         player_control.play_next()
-                        out_name, lines, secs, stamps, screen = get_song_info(p, space, counter)
-                        pygame.display.set_caption('LyricStamp: ' + out_name)
-                    if event.key == pygame.K_SPACE and counter > 0:
+                        counter = -2
+                        pg.display.set_caption('LyricStamp')
+                    if e.key == pg.K_SPACE and counter > 0:
                         player_control.play_pause()
-                    if event.key == pygame.K_DOWN:
+                    if e.key == pg.K_DOWN:
                         if counter == 0:
                             stamps[counter] = "[00:00.000]"
                             # player_control.play()
@@ -162,7 +184,7 @@ def main(in_name='lyrics.txt'):
                                 secs[counter] = pos
                                 stamps[counter] = stamp_internal(pos)
                         counter += 1
-                    if event.key == pygame.K_UP or event.key == pygame.K_LEFT:
+                    if e.key == pg.K_UP or e.key == pg.K_LEFT:
                         counter -= 1
                         secs[counter] = 0
                         stamps[counter] = ''
@@ -170,29 +192,28 @@ def main(in_name='lyrics.txt'):
                             counter -= 1
                             secs[counter] = 0
                             stamps[counter] = ''
-                        if event.key == pygame.K_UP:
+                        if e.key == pg.K_UP:
                             player_control.set_player_position(secs[counter - 1])
                 if counter >= len(lines):
-                    if event.key == pygame.K_RETURN:
+                    if e.key == pg.K_RETURN:
                         save_lyrics(lines, stamps, out_name)
                         screen.fill(GRAY)
-                if event.key == pygame.K_ESCAPE:
-                    return
         screen.fill(GRAY)
         cursor = print_info(screen, counter, lines, stamps, out_name, font)
-        if time.time() % 1 > 0.5:
-            pygame.draw.rect(screen, RED, cursor)
-        pygame.display.update()
+        if cursor and time.time() % 1 > 0.5:
+            pg.draw.rect(screen, RED, cursor)
+        pg.display.update()
         clock.tick(10)
+    pg.quit()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=""".""")
-    parser.add_argument("-i", "--in_name",
-                        help="local file to read static lyrics from; if none supplied, fetch from e.g. genius.com")
+    # parser = argparse.ArgumentParser(description=""".""")
+    # parser.add_argument("-i", "--in_name",
+    #                     help="local file to read static lyrics from; if none supplied, fetch from e.g. genius.com")
     # parser.add_argument("--lang",
     #                     help="if the song/book is in Chinese (use CN), Japanese (use JP), or Korean (use KR).")
-    args = parser.parse_args()
-    in_name = args.in_name
+    # args = parser.parse_args()
+    # in_name = args.in_name
     # lang = args.lang
-    main(in_name)
+    main()
