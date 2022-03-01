@@ -1,10 +1,10 @@
-Play a keyboard game alongside a song/audiobook to convert plain text `.txt` lyrics into time-stamped `.lrcx` (think lip-sync). Then use the produced time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. 
+Play a keyboard game alongside a song/audiobook to convert plain text `.txt` lyrics into time-stamped `.lrcx` (think lip-sync), with auxiliary info such as phonetics optionally added. Use the produced time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. 
 
 (And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And also to learn languages; e.g., to read along while listening and to precisely one-click jump to lines for repetition/reinforcement.)
 ![Demo](/demos/language.gif)
 
 ### Usage:
-Run `python3 lyricstamp.py` to call out the 'game' interface. (Currently the `lyrics.txt` is hard-coded to the song 'Je Lui Dirai' by 'Céline Dion'; automation incoming.)
+Run `python3 lyricstamp.py` to call out the 'game' interface. ~~(Currently the `lyrics.txt` is hard-coded to the song 'Je Lui Dirai' by 'Céline Dion'; automation incoming.)~~ Auto-fetching added. Need to update the text here.
 
 - Press 'Down-Arrow' to tell Apple Music to start media playing and simultaneously reset LyricStamp's timer (so the sound/text are auto-aligned at '00:00')
 - Keep pressing 'Down-Arrow' to go through the lines and to add stamp, one line at a time
