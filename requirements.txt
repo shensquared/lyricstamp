@@ -1,4 +1,4 @@
 pygame>=2.1.2
-lyricsgenius>=3.0.1
-cutlet
-pyjyutping
+lyricsgenius[genius]>=3.0.1
+cutlet[romaji]
+pyjyutping[jyutping]
