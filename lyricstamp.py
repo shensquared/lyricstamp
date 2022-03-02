@@ -30,7 +30,7 @@ def save_lyrics(lines, stamps, out_name):
 
 
 def welcome():
-    out_name = ''
+    out_name = 'Settings'
     lines = ['']
     secs = ['']
     stamps = ['']
@@ -40,7 +40,7 @@ def welcome():
     return out_name, lines, secs, stamps, screen
 
 
-def get_song_info(p, lines=None):
+def get_song_info(p, lines):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
     if not lines:
@@ -57,7 +57,7 @@ def get_song_info(p, lines=None):
     return out_name, lines, secs, stamps, screen
 
 
-def print_info(screen, counter, lines, stamps, out_name, font):
+def print_info(screen, font, counter, lines, stamps, out_name):
     def text_to_screen(text, y, color):
         try:
             text = font.render(text, True, color)
@@ -72,17 +72,16 @@ def print_info(screen, counter, lines, stamps, out_name, font):
     h = space[1]
     cursor = None
     if counter == -2:
+        # TODO, streamline below
         welcome_msg = ["Let's get the lyrics. A few ways to do that:",
                        "",
                        "",
-                       # TODO, streamline below
                        "- Press Right Arrow ➡ and we'll try fetch it from Genius.com.",
                        "- Press M and we'll try fetch from Musixmatch.com",
                        "- Press Enter and we'll get the lyrics from your clipboard.",
                        "- Drop a text file into this window and we'll read it."]
         screen_banner(*welcome_msg)
         # cursor = pg.Rect((50 + 3.5 * space[0], h * 10), (3, h))
-
     elif counter == -1:
         welcome_msg = ["Type in the language code if wanna phonetics added.",
                        "Press the Right Arrow ➡ to skip",
@@ -93,19 +92,21 @@ def print_info(screen, counter, lines, stamps, out_name, font):
                        "-Jyutping for Cantonese (type in 'Y')"]
         screen_banner(*welcome_msg)
         # cursor = pg.Rect((50 + 3.5 * space[0], h * 10), (3, h))
-    elif 0 <= counter <= len(lines) - 2:
-        screen_banner("Press Down-Arrow ⬇ to go to the next line,",
-                      "Left arrow ⬅ to erase the stamp of the current line,",
-                      "Up Arrow ⬆ to go back to the stamp of the previous line")
-        topleft = (20 + 3.5 * space[0], h * (counter - max(counter, 2) + 6.3))
-        if lines[counter + 1].startswith('[tr]'):
+    elif 0 <= counter <= len(lines) - 1:
+        screen_banner("Press:",
+                      "-Down Arrow ⬇ to go to the next line,",
+                      "-Left arrow ⬅ to erase the stamp of the current line,",
+                      "-Up Arrow ⬆ to go back to the stamp of the previous line",
+                      "Space bar to pause Apple Music")
+        topleft = (20 + 3.5 * space[0], h * (counter - max(counter, 2) + 8.3))
+        if counter <= len(lines) - 2 and lines[counter + 1].startswith('[tr]'):
             h = 2 * h
         cursor = pg.Rect(topleft, (3, h * .9))
         for i, l in enumerate(lines):
             if counter - 3 < i < max(counter, 2) + 9:
-                yy = space[1] * (i - max(counter, 2) + 6)
+                yy = space[1] * (i - max(counter, 2) + 8)
                 text_to_screen(str(i).zfill(3) + ': ' + stamps[i] + l, yy, BLACK)
-    if counter >= len(lines) - 1:
+    elif counter >= len(lines):
         screen_banner("Press Enter to end stamping and confirm that", out_name + " will be saved")
     return cursor
 
@@ -152,19 +153,20 @@ def main():
                         lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
                     counter = -1
                 if e.type == pg.KEYDOWN and e.key == pg.K_RIGHT:
+                    lines = None
                     counter = -1
             # phonetics page
             elif counter == -1:
-                if e.type == pg.KEYDOWN:
+                keys = [pg.K_j, pg.K_y, pg.K_RIGHT]
+                if e.type == pg.KEYDOWN and e.key in keys:
+                    counter = 0
                     if e.key == pg.K_j:
-                        out_name, lines, secs, stamps, screen = get_song_info('J', lines=lines)
-                        counter = 0
+                        p = 'J'
                     if e.key == pg.K_y:
-                        out_name, lines, secs, stamps, screen = get_song_info('Y', lines=lines)
-                        counter = 0
+                        p = 'Y'
                     if e.key == pg.K_RIGHT:
-                        out_name, lines, secs, stamps, screen = get_song_info(None)
-                        counter = 0
+                        p = None
+                    out_name, lines, secs, stamps, screen = get_song_info(p, lines)
             elif counter >= 0:
                 if e.type == pg.KEYDOWN:
                     if e.key == pg.K_RIGHT:
@@ -197,12 +199,11 @@ def main():
                             stamps[counter] = ''
                         if e.key == pg.K_UP:
                             player_control.set_player_position(secs[counter - 1])
-                if counter >= len(lines):
-                    if e.key == pg.K_RETURN:
+                    if counter >= len(lines) and e.key == pg.K_RETURN:
                         save_lyrics(lines, stamps, out_name)
                         screen.fill(GRAY)
         screen.fill(GRAY)
-        cursor = print_info(screen, counter, lines, stamps, out_name, font)
+        cursor = print_info(screen, font, counter, lines, stamps, out_name)
         if cursor and time.time() % 1 > 0.5:
             pg.draw.rect(screen, RED, cursor)
         pg.display.update()
