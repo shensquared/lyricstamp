@@ -1,6 +1,13 @@
-Play a keyboard game alongside a song/audiobook to convert plain text `.txt` lyrics into time-stamped `.lrcx` (think lip-sync), with auxiliary info such as phonetics optionally added. Use the produced time-stamped file in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. 
+Play a song/audiobook in iTunes/Music on Mac, and use LyricStamp to: 
+- [x] Fetch plain text lyrics/scripts from the Internet, or a local `.txt` file, or the clipboard
+- [x] Add timestamps to plain text lyrics by playing a keyboard game alongside (think lip-sync)
+- [ ] Add optional (context-based) phonetics automatically
+  - [x] Romaji for Japanese
+  - [x] Jyutping for Cantonese
+  - [ ] Pinying for Mandarin
+- [ ] Add optional (multi-language, i.e., one-to-many) translations
 
-(And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And also to learn languages; e.g., to read along while listening and to precisely one-click jump to lines for repetition/reinforcement.)
+The end result is a rich `.lrcx` file, to be used in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. (And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And also to learn languages; e.g., to read along while listening and to precisely one-click jump to lines for repetition/reinforcement.)
 ![Demo](/demos/language.gif)
 
 ### Usage:

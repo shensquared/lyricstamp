@@ -81,23 +81,21 @@ def print_info(screen, font, counter, lines, stamps, out_name):
                        "- Press Enter and we'll get the lyrics from your clipboard.",
                        "- Drop a text file into this window and we'll read it."]
         screen_banner(*welcome_msg)
-        # cursor = pg.Rect((50 + 3.5 * space[0], h * 10), (3, h))
     elif counter == -1:
         welcome_msg = ["Type in the language code if wanna phonetics added.",
-                       "Press the Right Arrow ➡ to skip",
+                       "Press Enter to skip.",
                        "",
                        "",
                        "Supported phonetics:",
                        "-Romaji for Japanese (type in 'J')",
                        "-Jyutping for Cantonese (type in 'Y')"]
         screen_banner(*welcome_msg)
-        # cursor = pg.Rect((50 + 3.5 * space[0], h * 10), (3, h))
     elif 0 <= counter <= len(lines) - 1:
         screen_banner("Press:",
-                      "-Down Arrow ⬇ to go to the next line,",
-                      "-Left arrow ⬅ to erase the stamp of the current line,",
-                      "-Up Arrow ⬆ to go back to the stamp of the previous line",
-                      "Space bar to pause Apple Music")
+                      "- Down Arrow ⬇ to go to the next line,",
+                      "- Left arrow ⬅ to erase the stamp of the current line,",
+                      "- Up Arrow ⬆ to go back to the stamp of the previous line",
+                      "- Space bar to pause Apple Music")
         topleft = (20 + 3.5 * space[0], h * (counter - max(counter, 2) + 8.3))
         if counter <= len(lines) - 2 and lines[counter + 1].startswith('[tr]'):
             h = 2 * h
@@ -157,15 +155,14 @@ def main():
                     counter = -1
             # phonetics page
             elif counter == -1:
-                keys = [pg.K_j, pg.K_y, pg.K_RIGHT]
+                keys = [pg.K_j, pg.K_y, pg.K_RETURN]
                 if e.type == pg.KEYDOWN and e.key in keys:
                     counter = 0
+                    p = None
                     if e.key == pg.K_j:
                         p = 'J'
                     if e.key == pg.K_y:
                         p = 'Y'
-                    if e.key == pg.K_RIGHT:
-                        p = None
                     out_name, lines, secs, stamps, screen = get_song_info(p, lines)
             elif counter >= 0:
                 if e.type == pg.KEYDOWN:
@@ -216,7 +213,7 @@ if __name__ == "__main__":
     # parser.add_argument("-i", "--in_name",
     #                     help="local file to read static lyrics from; if none supplied, fetch from e.g. genius.com")
     # parser.add_argument("--lang",
-    #                     help="if the song/book is in Chinese (use CN), Japanese (use JP), or Korean (use KR).")
+    #                     help="if the song/book is in Chinese (use C), Japanese (J), or Korean (K).")
     # args = parser.parse_args()
     # in_name = args.in_name
     # lang = args.lang
