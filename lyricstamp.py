@@ -15,8 +15,8 @@ space = (18, 44)
 
 
 def stamp_internal(pos):
-    m = str(int(pos / 60)).rjust(2, '0')
-    s = str(round(pos % 60, 3)).rjust(2, '0')
+    m = str(int(pos / 60))
+    s = str(round(pos % 60, 3))
     return "[" + m + ":" + s + "]"
 
 
@@ -40,13 +40,11 @@ def welcome():
     return out_name, lines, secs, stamps, screen
 
 
-def get_song_info(p, lines):
+def get_song_info(lines):
     title, artist = player_control.now_playing()
     out_name = title + ' - ' + artist
     if not lines:
         lines = get_texts(title, artist)
-
-    lines = add_phonetics(lines, p)
     lines.insert(0, out_name)
     secs = [0] * len(lines)
     stamps = [''] * len(lines)
@@ -85,11 +83,15 @@ def print_info(screen, font, counter, lines, stamps, out_name):
         welcome_msg = ["Type in the language code if wanna phonetics added.",
                        "Press Enter to skip.",
                        "",
-                       "",
                        "Supported phonetics:",
                        "-Romaji for Japanese (type in 'J')",
                        "-Jyutping for Cantonese (type in 'Y')"]
+        n = len(welcome_msg)
         screen_banner(*welcome_msg)
+        text_to_screen('Lyrics Preview: ', h*(n+2), BLACK)
+        for i, l in enumerate(lines[:5]):
+            yy = h * (i + n+3)
+            text_to_screen(l, yy, BLACK)
     elif 0 <= counter <= len(lines) - 1:
         screen_banner("Press:",
                       "- Down Arrow ⬇ to go to the next line,",
@@ -144,26 +146,29 @@ def main():
                             lines = cleanup(clipboard)
                         else:
                             lines = musicsmatch(clipboard)
+                    out_name, lines, secs, stamps, screen = get_song_info(lines)
                     counter = -1
                 if e.type == pg.DROPFILE:
                     in_name = e.file
                     with open(in_name) as f:
                         lines = [line.replace('\n', '') for line in f.readlines() if line.strip()]
+                    out_name, lines, secs, stamps, screen = get_song_info(lines)
                     counter = -1
                 if e.type == pg.KEYDOWN and e.key == pg.K_RIGHT:
                     lines = None
+                    out_name, lines, secs, stamps, screen = get_song_info(lines)
                     counter = -1
             # phonetics page
             elif counter == -1:
                 keys = [pg.K_j, pg.K_y, pg.K_RETURN]
                 if e.type == pg.KEYDOWN and e.key in keys:
-                    counter = 0
                     p = None
                     if e.key == pg.K_j:
                         p = 'J'
                     if e.key == pg.K_y:
                         p = 'Y'
-                    out_name, lines, secs, stamps, screen = get_song_info(p, lines)
+                    lines = add_phonetics(lines, p)
+                    counter = 0
             elif counter >= 0:
                 if e.type == pg.KEYDOWN:
                     if e.key == pg.K_RIGHT:
@@ -174,7 +179,7 @@ def main():
                         player_control.play_pause()
                     if e.key == pg.K_DOWN:
                         if counter == 0:
-                            stamps[counter] = "[00:00.000]"
+                            stamps[counter] = "[00:00.00]"
                             # player_control.play()
                         elif counter <= len(lines) - 1:
                             # insert new stamp into line; relies on iTunes/Music's internal player's position
