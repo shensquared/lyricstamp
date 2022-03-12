@@ -11,7 +11,9 @@ This produces a `.lrcx` to be used in tandem with [LyricsX](https://github.com/d
 ![Demo](/demos/language.gif)
 
 ### Usage:
-![Demo](/demos/demo.gif) 
+Run `python lyricstamp.py` to call out the 'game' interface, and follow the on-screen instructions. Here's a small demo.
+![Demo](/demos/demo.gif)
+When the last line is reached, press 'Enter' to end stamping, and save a `media_title - artist.lrcx` file to your LyricsX folder (where the `media_title` and `artist` are extracted from Music's now playing track properties via AppleScript). Enjoy!
 
 ### Motivation:
 - LyricsX works wonders with Apple Music, especially for songs with no built-in synchronized lyrics. However, LyricsX relies on `*.lrcx` searched and fetched from a few Asia-based web services, and understandably, supply for songs in other languages or indie/obscure songs are scarce. And while plain-text lyrics are abundant online, time-stamping solutions I've found (e.g. NLP-based, iMovie timeline adjustment) are either an overkill or a hassle. 
