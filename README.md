@@ -1,19 +1,17 @@
-# LyricStamp
-
-A tool for adding timestamps to lyrics synchronized with Apple Music playback on Mac, featuring a karaoke-style lyrics display inspired by [LyricsX](https://github.com/ddddxxx/LyricsX).
+# Apple Music Lyrics Companion
 
 ![LyricStamp Icon](lyricstamp.png)
 
+Create timestamped lyrics files with while listening to music. Translate and/or add phonetics. Display the lyrics in karaoke style.
+
+
 ## Features
 
-- [x] **Karaoke-Style Display**: Immersive full-screen lyrics display with progress animations, inspired by LyricsX
+- [x] **Easy Line Stamping**: Simple click-to-stamp interface for timing lyrics while music plays
 - [x] **Apple Music Integration**: Direct control of playback (play/pause, next track, position control)
+- [x] **Karaoke-Style Display**: Immersive full-screen lyrics display with progress animations, inspired by LyricsX
 - [x] **Multiple Input Sources**: Manual input, file upload, or clipboard
-- [x] **Real-time Timing**: Add timestamps while music plays
-- [x] **Auto-filename Generation**: Creates filenames from current song info
 - [x] **AI Enhancements**: Optional romaji and translation support via AI
-- [x] **Vim Keybindings**: Full Vim mode support in lyrics textarea
-- [x] **Separate Workflow**: Setup page for lyrics input, timing page for timestamping
 - [x] **Display Page**: View existing lyrics files with synchronized highlighting and auto-scroll
 - [x] **AI Processing Page**: Real-time status monitoring for AI enhancements
 
@@ -38,11 +36,12 @@ A tool for adding timestamps to lyrics synchronized with Apple Music playback on
 3. Click "Start Session" to begin timing
 
 ### Timing Page (`/timing`)
-1. **Music Control**: Use the Apple Music controls to manage playback
-2. **Timing**: Click "Start Timing" and press "Next" to add timestamps
-3. **Navigation**: Use arrow keys or buttons to move between lines
-4. **AI Enhancements**: Use the "🤖 AI Enhancements" button to add romaji or translations
-5. **Save**: Click "Save File" when done, or it will prompt you at the last line
+1. **Simple Stamping**: Just click "Next" to stamp each line's timing while music plays
+2. **Music Control**: Use the Apple Music controls to manage playback
+3. **Real-time Feedback**: See current line highlighted as you stamp it
+4. **Navigation**: Use arrow keys or buttons to move between lines
+5. **AI Enhancements**: Use the "🤖 AI Enhancements" button to add romaji or translations
+6. **Save**: Click "Save File" when done, or it will prompt you at the last line
 
 ### Display Page (`/display`)
 1. **Auto-load**: Automatically loads lyrics file matching current song
@@ -78,4 +77,4 @@ Saves `.lrcx` files to `~/Music/LyricsX/` for use with [LyricsX](https://github.
 
 LyricsX works wonders with Apple Music, especially for songs with no built-in synchronized lyrics. However, LyricsX relies on `*.lrcx` files from web services, and supply for songs in other languages or indie/obscure songs can be scarce. While plain-text lyrics are abundant online, time-stamping solutions are often overkill or a hassle.
 
-This tool provides a simple, intuitive way to add timestamps to any lyrics while listening to music, making synchronized lyrics accessible for any song. The karaoke-style display brings the professional LyricsX experience to your browser.
+This tool provides a simple, intuitive way to create timestamped lyrics files by playing along with music and clicking to mark each line's timing. Perfect for songs without built-in synchronized lyrics, making karaoke-style experiences accessible for any song. The built-in display brings the professional LyricsX experience to your browser.
