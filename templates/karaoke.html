@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyricStamp - Karaoke</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .karaoke-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90vw;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .karaoke-container:hover {
+            opacity: 0.3;
+        }
+
+        .lyrics-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 200px;
+            justify-content: center;
+        }
+
+        .lyric-line {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1.2;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .lyric-line.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .lyric-line.current {
+            color: #00f2fe;
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.8);
+        }
+
+        .lyric-line.next {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.8em;
+        }
+
+        .progress-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+            clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
+            transition: clip-path 0.1s linear;
+            pointer-events: none;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
+            transition: clip-path 0.1s linear;
+            pointer-events: none;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .karaoke-container:hover .controls {
+            opacity: 1;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #00f2fe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-lyrics {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5em;
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="karaoke-container" id="karaoke-container">
+        <div class="lyrics-stack" id="lyrics-stack">
+            <div class="loading">Loading lyrics...</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="window.location.href='/display'">📖 Scroll View</button>
+        <button class="btn" onclick="window.location.href='/setup'">📝 Setup</button>
+        <button class="btn" onclick="window.location.href='/timing'">⏱️ Timing</button>
+    </div>
+
+    <div class="status" id="status">
+        No track playing
+    </div>
+
+    <script>
+        let currentLyrics = [];
+        let currentTimestamps = [];
+        let currentPosition = 0;
+        let currentLineIndex = -1;
+        let nextLineIndex = -1;
+        let progressAnimations = [];
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshNowPlaying();
+            loadLyrics();
+            setInterval(updatePosition, 50); // Update every 50ms for smooth progress
+            setInterval(refreshNowPlaying, 3000);
+        });
+
+        function loadLyrics() {
+            fetch('/api/get_lyrics_file')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentLyrics = data.lines;
+                        currentTimestamps = data.timestamps;
+                        displayKaraokeLyrics();
+                    } else {
+                        showNoLyrics();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading lyrics:', error);
+                    showNoLyrics();
+                });
+        }
+
+        function showNoLyrics() {
+            const stack = document.getElementById('lyrics-stack');
+            stack.innerHTML = '<div class="no-lyrics">No lyrics found for current song</div>';
+        }
+
+        function displayKaraokeLyrics() {
+            const stack = document.getElementById('lyrics-stack');
+            stack.innerHTML = '';
+            
+            // Create current line element
+            const currentLine = document.createElement('div');
+            currentLine.className = 'lyric-line current';
+            currentLine.id = 'current-line';
+            
+            // Create progress overlay for current line
+            const progressOverlay = document.createElement('div');
+            progressOverlay.className = 'progress-overlay';
+            currentLine.appendChild(progressOverlay);
+            
+            // Create progress text for current line
+            const progressText = document.createElement('div');
+            progressText.className = 'progress-text';
+            currentLine.appendChild(progressText);
+            
+            // Create next line element
+            const nextLine = document.createElement('div');
+            nextLine.className = 'lyric-line next';
+            nextLine.id = 'next-line';
+            
+            stack.appendChild(currentLine);
+            stack.appendChild(nextLine);
+            
+            updateKaraokeDisplay();
+        }
+
+        function updateKaraokeDisplay() {
+            if (currentLyrics.length === 0) return;
+            
+            // Find current and next line indices
+            const currentTime = currentPosition;
+            let newCurrentIndex = -1;
+            let newNextIndex = -1;
+            
+            // Find current line (last line with timestamp <= current time)
+            for (let i = 0; i < currentTimestamps.length; i++) {
+                const time = parseTimestamp(currentTimestamps[i]);
+                if (time > 0 && time <= currentTime) {
+                    newCurrentIndex = i;
+                } else if (time > currentTime) {
+                    break;
+                }
+            }
+            
+            // If no current line found, use first line
+            if (newCurrentIndex === -1 && currentTimestamps.length > 0) {
+                newCurrentIndex = 0;
+            }
+            
+            // Find next line
+            if (newCurrentIndex >= 0 && newCurrentIndex < currentLyrics.length - 1) {
+                newNextIndex = newCurrentIndex + 1;
+            }
+            
+            // Update display if line changed
+            if (newCurrentIndex !== currentLineIndex || newNextIndex !== nextLineIndex) {
+                currentLineIndex = newCurrentIndex;
+                nextLineIndex = newNextIndex;
+                
+                updateLyricText();
+            }
+            
+            // Update progress animation
+            updateProgressAnimation();
+        }
+
+        function updateLyricText() {
+            const currentLineEl = document.getElementById('current-line');
+            const nextLineEl = document.getElementById('next-line');
+            
+            if (currentLineIndex >= 0 && currentLineIndex < currentLyrics.length) {
+                const currentText = currentLyrics[currentLineIndex];
+                currentLineEl.textContent = currentText;
+                currentLineEl.classList.add('active');
+            } else {
+                currentLineEl.textContent = '';
+                currentLineEl.classList.remove('active');
+            }
+            
+            if (nextLineIndex >= 0 && nextLineIndex < currentLyrics.length) {
+                const nextText = currentLyrics[nextLineIndex];
+                nextLineEl.textContent = nextText;
+                nextLineEl.classList.add('active');
+            } else {
+                nextLineEl.textContent = '';
+                nextLineEl.classList.remove('active');
+            }
+        }
+
+        function updateProgressAnimation() {
+            if (currentLineIndex < 0 || currentLineIndex >= currentTimestamps.length) return;
+            
+            const currentTime = currentPosition;
+            const currentTimestamp = parseTimestamp(currentTimestamps[currentLineIndex]);
+            const nextTimestamp = currentLineIndex < currentTimestamps.length - 1 ? 
+                parseTimestamp(currentTimestamps[currentLineIndex + 1]) : currentTimestamp + 5;
+            
+            // Calculate progress within current line (0 to 1)
+            let progress = 0;
+            if (nextTimestamp > currentTimestamp) {
+                progress = Math.max(0, Math.min(1, (currentTime - currentTimestamp) / (nextTimestamp - currentTimestamp)));
+            }
+            
+            // Update progress overlay and text
+            const currentLineEl = document.getElementById('current-line');
+            const progressOverlay = currentLineEl.querySelector('.progress-overlay');
+            const progressText = currentLineEl.querySelector('.progress-text');
+            
+            if (progressOverlay && progressText) {
+                const clipPath = `polygon(0 0, ${progress * 100}% 0, ${progress * 100}% 100%, 0 100%)`;
+                progressOverlay.style.clipPath = clipPath;
+                progressText.style.clipPath = clipPath;
+                progressText.textContent = currentLyrics[currentLineIndex] || '';
+            }
+        }
+
+        function parseTimestamp(timestamp) {
+            if (!timestamp) return 0;
+            const match = timestamp.match(/\[(\d+):(\d+)\.(\d+)\]/);
+            if (match) {
+                const minutes = parseInt(match[1]);
+                const seconds = parseInt(match[2]);
+                const milliseconds = parseInt(match[3]);
+                return minutes * 60 + seconds + milliseconds / 1000;
+            }
+            return 0;
+        }
+
+        function updatePosition() {
+            fetch('/api/music/position')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentPosition = data.position;
+                        updateKaraokeDisplay();
+                    }
+                })
+                .catch(error => {
+                    // Silent error handling
+                });
+        }
+
+        function refreshNowPlaying() {
+            fetch('/api/music/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const trackInfo = `${data.title} - ${data.artist}`;
+                        document.getElementById('status').textContent = trackInfo;
+                        
+                        // Reload lyrics if track changed
+                        const currentStatus = document.getElementById('status').textContent;
+                        if (currentStatus !== trackInfo) {
+                            loadLyrics();
+                        }
+                    } else {
+                        document.getElementById('status').textContent = 'No track playing';
+                    }
+                })
+                .catch(error => {
+                    // Silent error handling
+                });
+        }
+    </script>
+</body>
+</html> 
