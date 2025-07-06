@@ -1,4 +1,4 @@
-# Apple Music Lyrics Companion
+# LyricStamp
 
 ![LyricStamp Icon](lyricstamp.png)
 
@@ -26,7 +26,7 @@ Create timestamped lyrics files with while listening to music. Translate and/or 
    ```bash
    python web_lyricstamp.py
    ```
-4. Open your browser to `http://localhost:5000`
+4. Open your browser to `http://localhost:5734`
 
 ## Usage
 
