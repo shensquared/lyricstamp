@@ -686,7 +686,10 @@
                     if (data.success) {
                         const title = data.title || 'Unknown';
                         const artist = data.artist || 'Unknown';
-                        const filename = `${title} - ${artist}.lrcx`;
+                        // Create safe filename from title and artist
+                        const safeTitle = title.replace(/[<>:"/\\|?*]/g, '').substring(0, 50);
+                        const safeArtist = artist.replace(/[<>:"/\\|?*]/g, '').substring(0, 50);
+                        const filename = `${safeTitle} - ${safeArtist}.lrcx`;
                         document.getElementById('output-filename').value = filename;
                     } else {
                         alert('Could not get current song info');
@@ -874,9 +877,9 @@
                 .then(data => {
                     if (data.success) {
                         // Create safe filename from title and artist
-                        const title = data.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_').substring(0, 50);
-                        const artist = data.artist.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_').substring(0, 50);
-                        const filename = `${title}_-_${artist}.lrcx`;
+                        const title = data.title.replace(/[<>:"/\\|?*]/g, '').substring(0, 50);
+                        const artist = data.artist.replace(/[<>:"/\\|?*]/g, '').substring(0, 50);
+                        const filename = `${title} - ${artist}.lrcx`;
                         document.getElementById('output-filename').value = filename;
                     } else {
                         alert('Could not get current song info');
