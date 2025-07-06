@@ -153,7 +153,7 @@
 
         .music-info {
             background: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             border: 2px solid #e9ecef;
             margin-bottom: 20px;
@@ -185,30 +185,20 @@
     <div class="container">
         <div class="header">
             <h1>🎵 LyricStamp</h1>
-            <p>Prepare your lyrics for timing</p>
         </div>
 
         <div class="content">
-            <!-- Navigation -->
-            <div class="section">
-                <div style="display: flex; justify-content: flex-end; align-items: center;">
-                    <button class="btn btn-secondary" onclick="window.location.href='/display'">📖 Display</button>
-                    <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
-                </div>
-            </div>
+
 
             <!-- Music Info Section -->
             <div class="section">
                 <h2>🎵 Current Song</h2>
                 <div class="music-info">
-                    <div class="input-group">
-                        <label>Currently Playing:</label>
-                        <div id="now-playing" class="now-playing">
-                            <span id="current-track">No track playing</span>
-                        </div>
+                    <div id="now-playing" class="now-playing">
+                        <span id="current-track">No track playing</span>
                     </div>
 
-                    <div class="music-controls" style="display: flex; justify-content: space-between; gap: 8px;">
+                    <div class="music-controls" style="display: none;">
                         <button class="btn btn-secondary btn-small btn-input-height" onclick="playPause()" id="play-pause-btn" style="flex: 1;">▶️ Play/Pause</button>
                         <button class="btn btn-secondary btn-small btn-input-height" onclick="playFromStart()" style="flex: 1;">⏮️ Play from Start</button>
                         <button class="btn btn-secondary btn-small btn-input-height" onclick="nextTrack()" style="flex: 1;">⏭️ Next Track</button>
@@ -246,11 +236,16 @@
                     <label for="output-filename">Output Filename:</label>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="text" id="output-filename" placeholder="song_name.lrcx" value="untitled.lrcx" style="flex: 1;">
+                        <button type="button" class="btn btn-secondary btn-input-height" onclick="saveLyrics()" title="Save current lyrics to file">💾</button>
                         <button type="button" class="btn btn-secondary btn-input-height" onclick="updateFilenameFromSong()" title="Revert to current song as filename">↩️</button>
                     </div>
                 </div>
 
-                <button class="btn btn-success" onclick="startSession()">🚀 Start Timing Session</button>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="startSession()">🚀 Start Timing Session</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='/display'">📖 Display</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
+                </div>
             </div>
         </div>
     </div>
@@ -455,6 +450,49 @@
                     console.error('Error getting song info:', error);
                     alert('Error getting current song info');
                 });
+        }
+
+        function saveLyrics() {
+            const lyrics = document.getElementById('lyrics-text').value;
+            const filename = document.getElementById('output-filename').value;
+            
+            if (!lyrics.trim()) {
+                alert('Please enter some lyrics first');
+                return;
+            }
+            
+            if (!filename.trim()) {
+                alert('Please enter a filename first');
+                return;
+            }
+            
+            // Create a simple .lrcx file with just the lyrics (no timestamps)
+            const lines = lyrics.split('\n').filter(line => line.trim());
+            const timestamps = new Array(lines.length).fill('');
+            
+            fetch('/api/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    filename: filename,
+                    lines: lines,
+                    timestamps: timestamps
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Lyrics saved successfully!\n\nFilename: ${data.filename}\nLocation: ${data.full_path}`);
+                } else {
+                    alert('Error saving lyrics: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to save lyrics');
+            });
         }
 
         function updateSongDuration() {
