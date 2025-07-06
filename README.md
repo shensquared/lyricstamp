@@ -1,12 +1,12 @@
-# LyricStamp Web Interface
+# LyricStamp
 
-A web-based tool for adding timestamps to lyrics synchronized with Apple Music playback on Mac.
+A tool for adding timestamps to lyrics synchronized with Apple Music playback on Mac, featuring a karaoke-style lyrics display inspired by [LyricsX](https://github.com/ddddxxx/LyricsX).
 
 ![LyricStamp Icon](lyricstamp.png)
 
 ## Features
 
-- [x] **Web Interface**: Modern, responsive web UI for easy lyric timing
+- [x] **Karaoke-Style Display**: Immersive full-screen lyrics display with progress animations, inspired by LyricsX
 - [x] **Apple Music Integration**: Direct control of playback (play/pause, next track, position control)
 - [x] **Multiple Input Sources**: Manual input, file upload, or clipboard
 - [x] **Real-time Timing**: Add timestamps while music plays
@@ -14,7 +14,7 @@ A web-based tool for adding timestamps to lyrics synchronized with Apple Music p
 - [x] **AI Enhancements**: Optional romaji and translation support via AI
 - [x] **Vim Keybindings**: Full Vim mode support in lyrics textarea
 - [x] **Separate Workflow**: Setup page for lyrics input, timing page for timestamping
-- [x] **Display Page**: View existing lyrics files with synchronized highlighting
+- [x] **Display Page**: View existing lyrics files with synchronized highlighting and auto-scroll
 - [x] **AI Processing Page**: Real-time status monitoring for AI enhancements
 
 ## Installation
@@ -46,9 +46,16 @@ A web-based tool for adding timestamps to lyrics synchronized with Apple Music p
 
 ### Display Page (`/display`)
 1. **Auto-load**: Automatically loads lyrics file matching current song
-2. **Synchronized Display**: Highlights current line based on music position
+2. **Synchronized Display**: Highlights current line based on music position with LyricsX-style auto-scroll
 3. **Music Control**: Full Apple Music integration for playback control
 4. **File Info**: Shows song title, artist, and filename information
+
+### Karaoke Page (`/karaoke`)
+1. **Full-Screen Experience**: Immersive karaoke-style display with backdrop blur
+2. **Progress Animation**: Text fills with gradient color as lyrics progress
+3. **Two-Line Display**: Current line with progress + preview of next line
+4. **Auto-Hide Controls**: Hover to reveal navigation controls
+5. **Smooth Transitions**: Beautiful animations between lyric changes
 
 ### AI Processing Page (`/ai-processing`)
 1. **Real-time Status**: Live monitoring of AI enhancement progress
@@ -65,10 +72,10 @@ A web-based tool for adding timestamps to lyrics synchronized with Apple Music p
 
 ## Output
 
-Saves `.lrcx` files to `~/Music/LyricsX/` for use with [LyricsX](https://github.com/ddddxxx/LyricsX).
+Saves `.lrcx` files to `~/Music/LyricsX/` for use with [LyricsX](https://github.com/ddddxxx/LyricsX) or display directly in the app's built-in lyrics viewer.
 
 ## Motivation
 
 LyricsX works wonders with Apple Music, especially for songs with no built-in synchronized lyrics. However, LyricsX relies on `*.lrcx` files from web services, and supply for songs in other languages or indie/obscure songs can be scarce. While plain-text lyrics are abundant online, time-stamping solutions are often overkill or a hassle.
 
-This web interface provides a simple, intuitive way to add timestamps to any lyrics while listening to music, making synchronized lyrics accessible for any song.
+This tool provides a simple, intuitive way to add timestamps to any lyrics while listening to music, making synchronized lyrics accessible for any song. The karaoke-style display brings the professional LyricsX experience to your browser.
