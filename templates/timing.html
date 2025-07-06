@@ -327,7 +327,11 @@
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>⏱️ Timing Interface</h2>
-                    <button class="btn btn-secondary" onclick="window.location.href='/setup'">📝 Back to Setup</button>
+                    <div>
+                        <button class="btn btn-secondary" onclick="window.location.href='/setup'">📝 Setup</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='/display'">📖 Display</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
+                    </div>
                 </div>
             </div>
 
@@ -714,6 +718,10 @@
                 return;
             }
             
+            // Redirect to AI processing page
+            window.location.href = '/ai-processing';
+            
+            // Start AI processing in background
             fetch('/api/ai_menu', {
                 method: 'POST',
                 headers: {
@@ -728,14 +736,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    currentSession.lines = data.enhanced_lines;
-                    currentSession.timestamps = new Array(data.total_lines).fill('');
-                    currentSession.currentLine = 0;
-                    updateTimingInterface();
-                    alert('AI processing completed!');
+                    console.log('AI processing completed');
                 } else {
-                    alert('AI processing failed');
+                    console.error('AI processing error:', data.error);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         }
 
