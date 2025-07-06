@@ -1,0 +1,66 @@
+{
+  "$schema": "https://tauri.app/v1/schema.json",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devPath": "http://localhost:5734",
+    "distDir": "../templates"
+  },
+  "tauri": {
+    "bundle": {
+      "active": true,
+      "identifier": "edu.shensquared.lyricstamp.app",
+      "icon": [
+        "icon.icns"
+      ],
+      "resources": [],
+      "externalBin": [],
+      "copyright": "Copyright © Shen Shen. All rights reserved.",
+      "category": "public.app-category.music",
+      "shortDescription": "Lyrics timing tool for Apple Music",
+      "longDescription": "A web-based tool for adding timestamps to lyrics synchronized with Apple Music playback on Mac.",
+      "deb": {
+        "depends": []
+      },
+      "macOS": {
+        "minimumSystemVersion": "10.13.0",
+        "exceptionDomain": "",
+        "signingIdentity": null,
+        "providerShortName": null,
+        "entitlements": null,
+        "infoPlist": {
+          "CFBundleDisplayName": "LyricStamp",
+          "CFBundleName": "LyricStamp",
+          "CFBundleVersion": "0.0.2",
+          "CFBundleShortVersionString": "0.0.2",
+          "CFBundleIdentifier": "edu.shensquared.lyricstamp.app",
+          "CFBundleDocumentTypes": [],
+          "CFBundleURLTypes": [],
+          "NSHumanReadableCopyright": "Copyright © Shen Shen. All rights reserved.",
+          "NSHighResolutionCapable": true,
+          "LSMinimumSystemVersion": "10.13.0",
+          "LSApplicationCategoryType": "public.app-category.music"
+        }
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "LyricStamp",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "url": "http://localhost:5734"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' http://localhost:5734; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+    }
+  }
+} 
