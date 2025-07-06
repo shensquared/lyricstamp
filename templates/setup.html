@@ -198,7 +198,7 @@
                         <div id="now-playing" class="now-playing" style="flex: 1;">
                             <span id="current-track">No track playing</span>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-input-height" onclick="refreshNowPlaying()" title="Refresh current song info">🔄</button>
+                        <button type="button" class="btn btn-secondary btn-input-height" onclick="copySongInfo()" title="Copy song info for lyrics search">📋</button>
                     </div>
 
                     <div class="music-controls" style="display: none;">
@@ -262,6 +262,9 @@
             updateFilenameFromSong();
             // Show the appropriate input method (Manual Input is default)
             toggleLyricsInput();
+            
+            // Auto-refresh now playing info every 2 seconds
+            setInterval(refreshNowPlaying, 2000);
         });
 
         function toggleLyricsInput() {
@@ -817,6 +820,16 @@
             const newLine = above ? currentLine : currentLine + 1;
             const newPos = getPositionFromLineCol(textarea.value, newLine, 0);
             textarea.setSelectionRange(newPos, newPos);
+        }
+
+        function copySongInfo() {
+            const trackInfo = document.getElementById('current-track').textContent;
+            navigator.clipboard.writeText(trackInfo).then(() => {
+                alert('Song info copied to clipboard!');
+            }).catch(err => {
+                console.error('Error copying song info:', err);
+                alert('Failed to copy song info.');
+            });
         }
     </script>
 </body>
