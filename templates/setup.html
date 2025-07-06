@@ -100,6 +100,24 @@
             margin-bottom: 10px;
         }
 
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        .btn-input-height {
+            padding: 12px 16px;
+            font-size: 16px;
+            height: auto;
+            line-height: 1;
+            box-sizing: border-box;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 0;
+            vertical-align: middle;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
@@ -171,6 +189,14 @@
         </div>
 
         <div class="content">
+            <!-- Navigation -->
+            <div class="section">
+                <div style="display: flex; justify-content: flex-end; align-items: center;">
+                    <button class="btn btn-secondary" onclick="window.location.href='/display'">📖 Display</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
+                </div>
+            </div>
+
             <!-- Music Info Section -->
             <div class="section">
                 <h2>🎵 Current Song</h2>
@@ -182,11 +208,11 @@
                         </div>
                     </div>
 
-                    <div class="music-controls">
-                        <button class="btn btn-secondary" onclick="playPause()" id="play-pause-btn">▶️ Play/Pause</button>
-                        <button class="btn btn-secondary" onclick="playFromStart()">⏮️ Play from Start</button>
-                        <button class="btn btn-secondary" onclick="nextTrack()">⏭️ Next Track</button>
-                        <button class="btn btn-secondary" onclick="refreshNowPlaying()">🔄 Refresh</button>
+                    <div class="music-controls" style="display: flex; justify-content: space-between; gap: 8px;">
+                        <button class="btn btn-secondary btn-small btn-input-height" onclick="playPause()" id="play-pause-btn" style="flex: 1;">▶️ Play/Pause</button>
+                        <button class="btn btn-secondary btn-small btn-input-height" onclick="playFromStart()" style="flex: 1;">⏮️ Play from Start</button>
+                        <button class="btn btn-secondary btn-small btn-input-height" onclick="nextTrack()" style="flex: 1;">⏭️ Next Track</button>
+                        <button class="btn btn-secondary btn-small btn-input-height" onclick="refreshNowPlaying()" style="flex: 1;">🔄 Refresh</button>
                     </div>
                 </div>
             </div>
@@ -218,8 +244,10 @@
 
                 <div class="input-group">
                     <label for="output-filename">Output Filename:</label>
-                    <input type="text" id="output-filename" placeholder="song_name.lrcx" value="untitled.lrcx">
-                    <button type="button" class="btn btn-secondary" onclick="updateFilenameFromSong()" style="margin-top: 5px;">🎵 Use Current Song</button>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="text" id="output-filename" placeholder="song_name.lrcx" value="untitled.lrcx" style="flex: 1;">
+                        <button type="button" class="btn btn-secondary btn-input-height" onclick="updateFilenameFromSong()" title="Revert to current song as filename">↩️</button>
+                    </div>
                 </div>
 
                 <button class="btn btn-success" onclick="startSession()">🚀 Start Timing Session</button>
