@@ -2,3 +2,4 @@ pygame>=2.1.2
 lyricsgenius[genius]>=3.0.1
 cutlet[romaji]
 pyjyutping[jyutping]
+requests==2.32.4
