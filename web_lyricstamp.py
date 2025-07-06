@@ -78,12 +78,12 @@ def create_safe_filename(title, artist):
     safe_title = re.sub(r'[<>:"/\\|?*]', '', title)
     safe_artist = re.sub(r'[<>:"/\\|?*]', '', artist)
     
-    # Replace spaces with underscores and limit length
-    safe_title = safe_title.replace(' ', '_')[:50]
-    safe_artist = safe_artist.replace(' ', '_')[:50]
+    # Keep spaces, just limit length
+    safe_title = safe_title[:50]
+    safe_artist = safe_artist[:50]
     
-    # Create filename
-    filename = f"{safe_title}_-_{safe_artist}.lrcx"
+    # Create filename with space-dash-space format
+    filename = f"{safe_title} - {safe_artist}.lrcx"
     
     return filename
 
@@ -140,6 +140,21 @@ def setup():
 def timing():
     """Timing interface page."""
     return render_template('timing.html')
+
+@app.route('/display')
+def display():
+    """Display page for viewing existing .lrcx files."""
+    return render_template('display.html')
+
+@app.route('/karaoke')
+def karaoke():
+    """Karaoke-style lyrics display page."""
+    return render_template('karaoke.html')
+
+@app.route('/ai-processing')
+def ai_processing():
+    """AI processing page for real-time AI enhancement status."""
+    return render_template('ai_processing.html')
 
 @app.route('/api/start_session', methods=['POST'])
 def start_session():
@@ -301,6 +316,16 @@ def save_file():
     else:
         return jsonify({'error': 'Failed to save file'}), 500
 
+# Global AI processing status
+ai_processing_status = {
+    'status': 'idle',  # idle, processing, completed, error
+    'current_line': 0,
+    'total_lines': 0,
+    'progress': 0,
+    'message': '',
+    'backend': 'ollama'
+}
+
 @app.route('/api/ai_menu', methods=['POST'])
 def ai_menu():
     """Show AI processing options."""
@@ -310,6 +335,17 @@ def ai_menu():
     use_ollama = data.get('use_ollama', False)
     
     if add_romaji or add_translation:
+        # Initialize AI processing status
+        global ai_processing_status
+        ai_processing_status = {
+            'status': 'processing',
+            'current_line': 0,
+            'total_lines': len(current_session['lines']),
+            'progress': 0,
+            'message': 'Starting AI processing...',
+            'backend': 'ollama' if use_ollama else 'openai'
+        }
+        
         # Create backup first
         backup_filename = current_session['output_filename'].replace('.lrcx', '.backup.lrcx')
         save_lyrics(current_session['lines'], current_session['timestamps'], backup_filename)
@@ -326,6 +362,11 @@ def ai_menu():
         current_session['lines'] = enhanced_lines
         current_session['timestamps'] = [''] * len(enhanced_lines)
         
+        # Update status to completed
+        ai_processing_status['status'] = 'completed'
+        ai_processing_status['progress'] = 100
+        ai_processing_status['message'] = 'AI processing completed successfully!'
+        
         return jsonify({
             'success': True,
             'enhanced_lines': enhanced_lines,
@@ -333,6 +374,12 @@ def ai_menu():
         })
     
     return jsonify({'success': True})
+
+@app.route('/api/ai_status')
+def ai_status():
+    """Get current AI processing status."""
+    global ai_processing_status
+    return jsonify(ai_processing_status)
 
 @app.route('/api/get_status')
 def get_status():
@@ -359,6 +406,50 @@ def get_session_lines():
         'lines': current_session['lines'],
         'timestamps': current_session['timestamps']
     })
+
+@app.route('/api/get_lyrics_file')
+def get_lyrics_file():
+    """Get lyrics from an existing .lrcx file based on current song."""
+    try:
+        title, artist = player_control.now_playing()
+        filename = create_safe_filename(title, artist)
+        file_path = os.path.join(get_lyricsx_dir(), filename)
+        
+        if not os.path.exists(file_path):
+            return jsonify({'error': f'No lyrics file found for: {title} - {artist}'}), 404
+        
+        # Read the .lrcx file
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Parse the content into lines with timestamps
+        lines = []
+        timestamps = []
+        
+        for line in content.strip().split('\n'):
+            if line.strip():
+                # Check if line starts with timestamp [mm:ss.mmm]
+                if line.startswith('[') and ']' in line:
+                    timestamp_end = line.find(']')
+                    timestamp = line[:timestamp_end + 1]
+                    lyric = line[timestamp_end + 1:].strip()
+                    timestamps.append(timestamp)
+                    lines.append(lyric)
+                else:
+                    timestamps.append('')
+                    lines.append(line.strip())
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'title': title,
+            'artist': artist,
+            'lines': lines,
+            'timestamps': timestamps
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Error loading lyrics: {str(e)}'}), 500
 
 # Apple Music Control Endpoints
 @app.route('/api/music/now_playing')
