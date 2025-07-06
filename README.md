@@ -1,6 +1,6 @@
 # LyricStamp
 
-![LyricStamp Icon](lyricstamp.png)
+<img src="lyricstamp.png" alt="LyricStamp Icon" width="50%">
 
 Create timestamped lyrics files with while listening to music. Translate and/or add phonetics. Display the lyrics in karaoke style.
 
