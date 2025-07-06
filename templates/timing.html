@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyricStamp Web Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+        }
+
+        .timing-interface {
+            background: white;
+            border: 2px solid #4facfe;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .timing-interface.active {
+            display: block;
+        }
+
+        .current-line {
+            font-size: 2em;
+            color: #333;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .timing-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .status.recording {
+            background: #ffe6e6;
+            color: #d63031;
+            border: 2px solid #ff7675;
+        }
+
+        .status.ready {
+            background: #e6ffe6;
+            color: #00b894;
+            border: 2px solid #55a3ff;
+        }
+
+        .lyrics-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+        }
+
+        .lyric-line {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lyric-line.current {
+            background: #e3f2fd;
+            border-left: 4px solid #4facfe;
+        }
+
+        .lyric-line.completed {
+            background: #f1f8e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .timestamp {
+            font-family: monospace;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .now-playing {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        #position-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #position-display {
+            font-family: monospace;
+            font-weight: 600;
+            color: #495057;
+            margin-left: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .timing-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .current-line {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 LyricStamp</h1>
+            <p>Web-based Lyric Timing Interface</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Navigation -->
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>⏱️ Timing Interface</h2>
+                    <button class="btn btn-secondary" onclick="window.location.href='/setup'">📝 Back to Setup</button>
+                </div>
+            </div>
+
+            <!-- Music Control Section -->
+            <div class="section" id="music-control-section">
+                <h2>🎵 Apple Music Control</h2>
+                
+                <div class="input-group">
+                    <label>Currently Playing:</label>
+                    <div id="now-playing" class="now-playing">
+                        <span id="current-track">No track playing</span>
+                    </div>
+                </div>
+
+                <div class="music-controls">
+                    <button class="btn btn-secondary" onclick="playPause()" id="play-pause-btn">▶️ Play/Pause</button>
+                    <button class="btn btn-secondary" onclick="playFromStart()">⏮️ Play from Start</button>
+                    <button class="btn btn-secondary" onclick="nextTrack()">⏭️ Next Track</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="position-slider">Position:</label>
+                    <input type="range" id="position-slider" min="0" max="100" value="0" onchange="setPosition(this.value)">
+                    <span id="position-display">0:00</span> / <span id="duration-display">0:00</span>
+                </div>
+
+                <button class="btn" onclick="refreshNowPlaying()">🔄 Refresh</button>
+            </div>
+
+            <!-- Timing Interface -->
+            <div class="timing-interface active" id="timing-interface">
+                <h2>⏱️ Timing Interface</h2>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <div class="status" id="status">Ready to start timing</div>
+
+                <div class="current-line" id="current-line">
+                    Click "Start Timing" to begin
+                </div>
+
+                <div class="timing-controls">
+                    <button class="btn btn-secondary" onclick="prevLine()" id="prev-btn">⬅️ Previous</button>
+                    <button class="btn" onclick="toggleTiming()" id="timing-btn">▶️ Start Timing</button>
+                    <button class="btn btn-secondary" onclick="nextLine()" id="next-btn">Next ➡️</button>
+                </div>
+
+                <div class="lyrics-preview" id="lyrics-preview"></div>
+
+                <div style="margin-top: 20px;">
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="output-filename">Output Filename:</label>
+                        <input type="text" id="output-filename" placeholder="Auto-generated from current song" style="margin-bottom: 10px;">
+                        <button class="btn btn-secondary" onclick="autoFillFilename()" style="margin-left: 10px;">🔄 Auto-fill</button>
+                    </div>
+                    <button class="btn btn-success" onclick="saveFile()">💾 Save File</button>
+                    <button class="btn btn-secondary" onclick="showAIMenu()">🤖 AI Enhancements</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Menu Modal -->
+    <div class="modal" id="ai-modal">
+        <div class="modal-content">
+            <h3>🤖 AI Enhancement Options</h3>
+            
+            <div class="input-group">
+                <label>
+                    <input type="checkbox" id="add-romaji"> Add Romaji (Japanese pronunciation)
+                </label>
+            </div>
+            
+            <div class="input-group">
+                <label>
+                    <input type="checkbox" id="add-translation"> Add English Translation
+                </label>
+            </div>
+            
+            <div class="input-group">
+                <label for="ai-backend">AI Backend:</label>
+                <select id="ai-backend">
+                    <option value="ollama">Ollama (Local)</option>
+                    <option value="openai">OpenAI (Cloud)</option>
+                </select>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn" onclick="processAI()">Process</button>
+                <button class="btn btn-secondary" onclick="closeAIModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSession = {
+            lines: [],
+            timestamps: [],
+            currentLine: 0,
+            isRecording: false,
+            startTime: 0
+        };
+
+        let recordingInterval = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSessionData();
+            updateStatus();
+            refreshNowPlaying();
+            updateSongDuration();
+            // Update position every 2 seconds
+            setInterval(updatePositionSlider, 2000);
+        });
+
+        function loadSessionData() {
+            fetch('/api/get_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        // No active session, redirect to setup
+                        window.location.href = '/setup';
+                        return;
+                    }
+                    
+                    // Load session data
+                    currentSession.currentLine = data.current_line;
+                    currentSession.isRecording = data.is_recording;
+                    
+                    // Get the lines from the session
+                    fetch('/api/get_session_lines')
+                        .then(response => response.json())
+                        .then(lineData => {
+                            if (lineData.success) {
+                                currentSession.lines = lineData.lines;
+                                currentSession.timestamps = lineData.timestamps || [];
+                                updateTimingInterface();
+                            }
+                        });
+                })
+                .catch(error => {
+                    console.error('Error loading session data:', error);
+                    // Redirect to setup if there's an error
+                    window.location.href = '/setup';
+                });
+        }
+
+        function updateTimingInterface() {
+            const currentLineEl = document.getElementById('current-line');
+            const progressFill = document.getElementById('progress-fill');
+            const lyricsPreview = document.getElementById('lyrics-preview');
+            
+            if (currentSession.lines.length > 0) {
+                currentLineEl.textContent = currentSession.lines[currentSession.currentLine];
+                
+                // Update progress
+                const progress = ((currentSession.currentLine + 1) / currentSession.lines.length) * 100;
+                progressFill.style.width = progress + '%';
+                
+                // Update lyrics preview
+                lyricsPreview.innerHTML = currentSession.lines.map((line, index) => {
+                    let className = 'lyric-line';
+                    if (index === currentSession.currentLine) {
+                        className += ' current';
+                    } else if (currentSession.timestamps[index]) {
+                        className += ' completed';
+                    }
+                    
+                    return `
+                        <div class="${className}">
+                            <span>${line}</span>
+                            <span class="timestamp">${currentSession.timestamps[index] || ''}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            const timingBtn = document.getElementById('timing-btn');
+            
+            if (currentSession.isRecording) {
+                statusEl.textContent = 'Recording... Press Space to stop';
+                statusEl.className = 'status recording';
+                timingBtn.textContent = '⏹️ Stop Timing';
+            } else {
+                statusEl.textContent = 'Ready to start timing';
+                statusEl.className = 'status ready';
+                timingBtn.textContent = '▶️ Start Timing';
+            }
+        }
+
+        function toggleTiming() {
+            if (currentSession.isRecording) {
+                stopTiming();
+            } else {
+                startTiming();
+            }
+        }
+
+        function startTiming() {
+            fetch('/api/start_timing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession.isRecording = true;
+                    currentSession.startTime = Date.now();
+                    updateStatus();
+                    
+                    // Start recording indicator
+                    recordingInterval = setInterval(() => {
+                        const elapsed = Date.now() - currentSession.startTime;
+                        const seconds = Math.floor(elapsed / 1000);
+                        const ms = Math.floor((elapsed % 1000) / 10);
+                        document.getElementById('status').textContent = 
+                            `Recording... ${Math.floor(seconds/60)}:${(seconds%60).toString().padStart(2,'0')}.${ms.toString().padStart(2,'0')}`;
+                    }, 100);
+                }
+            });
+        }
+
+        function stopTiming() {
+            fetch('/api/stop_timing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession.isRecording = false;
+                    currentSession.timestamps[currentSession.currentLine] = data.timestamp;
+                    
+                    if (recordingInterval) {
+                        clearInterval(recordingInterval);
+                        recordingInterval = null;
+                    }
+                    
+                    updateTimingInterface();
+                }
+            });
+        }
+
+        function nextLine() {
+            fetch('/api/next_line', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the timestamp for the previous line (current line before moving)
+                    const previousLine = data.current_line - 1;
+                    if (previousLine >= 0 && data.timestamp) {
+                        currentSession.timestamps[previousLine] = data.timestamp;
+                    }
+                    currentSession.currentLine = data.current_line;
+                    updateTimingInterface();
+                } else {
+                    // Handle case when we're at the last line
+                    if (data.error === 'Already at last line') {
+                        // Still add timestamp for the current line even if we can't move forward
+                        if (data.current_line >= 0) {
+                            // Get current player position for timestamp
+                            fetch('/api/music/position')
+                                .then(response => response.json())
+                                .then(posData => {
+                                    if (posData.success) {
+                                        const pos = posData.position;
+                                        const minutes = Math.floor(pos / 60);
+                                        const seconds = Math.floor(pos % 60);
+                                        const milliseconds = Math.floor((pos % 1) * 1000);
+                                        const timestamp = `[${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}]`;
+                                        
+                                        currentSession.timestamps[data.current_line] = timestamp;
+                                        updateTimingInterface();
+                                        if (confirm('Reached the last line! All timestamps have been added.\n\nWould you like to save the file now?')) {
+                                            saveFile();
+                                        }
+                                    }
+                                });
+                        }
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                }
+            });
+        }
+
+        function prevLine() {
+            fetch('/api/prev_line', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession.currentLine = data.current_line;
+                    updateTimingInterface();
+                }
+            });
+        }
+
+        function saveFile() {
+            let filename = document.getElementById('output-filename').value;
+            
+            // If no filename provided, use auto-generated one
+            if (!filename.trim()) {
+                filename = null; // Let backend auto-generate
+            }
+            
+            fetch('/api/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    filename: filename
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`File saved successfully!\n\nFilename: ${data.filename}\nLocation: ${data.full_path}`);
+                    // Update the filename input with the saved filename
+                    document.getElementById('output-filename').value = data.filename;
+                } else {
+                    alert('Error saving file: ' + data.error);
+                }
+            });
+        }
+
+        function autoFillFilename() {
+            fetch('/api/music/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const title = data.title || 'Unknown';
+                        const artist = data.artist || 'Unknown';
+                        const filename = `${title} - ${artist}.lrcx`;
+                        document.getElementById('output-filename').value = filename;
+                    } else {
+                        alert('Could not get current song info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting song info:', error);
+                    alert('Error getting current song info');
+                });
+        }
+
+        function showAIMenu() {
+            document.getElementById('ai-modal').style.display = 'block';
+        }
+
+        function closeAIModal() {
+            document.getElementById('ai-modal').style.display = 'none';
+        }
+
+        function processAI() {
+            const addRomaji = document.getElementById('add-romaji').checked;
+            const addTranslation = document.getElementById('add-translation').checked;
+            const useOllama = document.getElementById('ai-backend').value === 'ollama';
+            
+            closeAIModal();
+            
+            if (!addRomaji && !addTranslation) {
+                alert('Please select at least one enhancement option');
+                return;
+            }
+            
+            fetch('/api/ai_menu', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    add_romaji: addRomaji,
+                    add_translation: addTranslation,
+                    use_ollama: useOllama
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession.lines = data.enhanced_lines;
+                    currentSession.timestamps = new Array(data.total_lines).fill('');
+                    currentSession.currentLine = 0;
+                    updateTimingInterface();
+                    alert('AI processing completed!');
+                } else {
+                    alert('AI processing failed');
+                }
+            });
+        }
+
+        // Music Control Functions
+        function refreshNowPlaying() {
+            fetch('/api/music/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const trackInfo = `${data.title} - ${data.artist}`;
+                        document.getElementById('current-track').textContent = trackInfo;
+                        // Update duration when track changes
+                        updateSongDuration();
+                    } else {
+                        document.getElementById('current-track').textContent = 'No track playing';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching now playing:', error);
+                    document.getElementById('current-track').textContent = 'Error loading track info';
+                });
+        }
+
+        function playPause() {
+            fetch('/api/music/play_pause', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the now playing info after a short delay
+                    setTimeout(refreshNowPlaying, 500);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling play/pause:', error);
+                alert('Failed to control playback');
+            });
+        }
+
+        function playFromStart() {
+            fetch('/api/music/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(refreshNowPlaying, 500);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error playing from start:', error);
+                alert('Failed to play from start');
+            });
+        }
+
+        function nextTrack() {
+            fetch('/api/music/next', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(refreshNowPlaying, 500);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error playing next track:', error);
+                alert('Failed to play next track');
+            });
+        }
+
+        function setPosition(position) {
+            fetch('/api/music/position', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    position: parseFloat(position)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updatePositionDisplay(position);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error setting position:', error);
+                alert('Failed to set position');
+            });
+        }
+
+        function updatePositionDisplay(position) {
+            const minutes = Math.floor(position / 60);
+            const seconds = Math.floor(position % 60);
+            document.getElementById('position-display').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateDurationDisplay(duration) {
+            const minutes = Math.floor(duration / 60);
+            const seconds = Math.floor(duration % 60);
+            document.getElementById('duration-display').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateFilenameFromSong() {
+            fetch('/api/music/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create safe filename from title and artist
+                        const title = data.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_').substring(0, 50);
+                        const artist = data.artist.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_').substring(0, 50);
+                        const filename = `${title}_-_${artist}.lrcx`;
+                        document.getElementById('output-filename').value = filename;
+                    } else {
+                        alert('Could not get current song info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting song info:', error);
+                    alert('Error getting current song info');
+                });
+        }
+
+        function updateSongDuration() {
+            fetch('/api/music/duration')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const duration = data.duration;
+                        document.getElementById('position-slider').max = duration;
+                        updateDurationDisplay(duration);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching duration:', error);
+                });
+        }
+
+        function updatePositionSlider() {
+            fetch('/api/music/position')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const position = data.position;
+                        document.getElementById('position-slider').value = position;
+                        updatePositionDisplay(position);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching position:', error);
+                });
+        }
+
+        // Vim keybindings for lyrics textarea
+        let vimMode = 'normal';
+        let vimBuffer = '';
+        let vimCount = '';
+        
+        document.getElementById('lyrics-text').addEventListener('keydown', function(e) {
+            if (vimMode === 'insert') {
+                // In insert mode, only handle Escape to return to normal mode
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    vimMode = 'normal';
+                    updateVimStatus();
+                }
+                return; // Let normal typing work
+            }
+            
+            // Normal mode - handle Vim commands
+            e.preventDefault();
+            
+            if (e.key === 'i') {
+                vimMode = 'insert';
+                updateVimStatus();
+                return;
+            }
+            
+            if (e.key === 'v') {
+                // Visual mode (simple implementation)
+                vimMode = 'visual';
+                updateVimStatus();
+                return;
+            }
+            
+            if (e.key === 'Escape') {
+                vimMode = 'normal';
+                vimBuffer = '';
+                vimCount = '';
+                updateVimStatus();
+                return;
+            }
+            
+            // Number keys for count
+            if (/^[0-9]$/.test(e.key)) {
+                vimCount += e.key;
+                updateVimStatus();
+                return;
+            }
+            
+            // Movement commands
+            const count = parseInt(vimCount) || 1;
+            const textarea = e.target;
+            const lines = textarea.value.split('\n');
+            const currentPos = textarea.selectionStart;
+            const currentLine = getCurrentLine(textarea.value, currentPos);
+            const currentCol = getCurrentColumn(textarea.value, currentPos);
+            
+            switch (e.key) {
+                case 'h':
+                    moveCursor(textarea, -count);
+                    break;
+                case 'l':
+                    moveCursor(textarea, count);
+                    break;
+                case 'j':
+                    moveCursorDown(textarea, count);
+                    break;
+                case 'k':
+                    moveCursorUp(textarea, count);
+                    break;
+                case '0':
+                    moveToLineStart(textarea);
+                    break;
+                case '$':
+                    moveToLineEnd(textarea);
+                    break;
+                case 'w':
+                    moveToNextWord(textarea, count);
+                    break;
+                case 'b':
+                    moveToPrevWord(textarea, count);
+                    break;
+                case 'G':
+                    moveToEnd(textarea);
+                    break;
+                case 'g':
+                    if (vimBuffer === 'g') {
+                        moveToStart(textarea);
+                        vimBuffer = '';
+                    } else {
+                        vimBuffer = 'g';
+                    }
+                    break;
+                case 'd':
+                    if (vimBuffer === 'd') {
+                        deleteLine(textarea);
+                        vimBuffer = '';
+                    } else {
+                        vimBuffer = 'd';
+                    }
+                    break;
+                case 'y':
+                    if (vimBuffer === 'y') {
+                        yankLine(textarea);
+                        vimBuffer = '';
+                    } else {
+                        vimBuffer = 'y';
+                    }
+                    break;
+                case 'p':
+                    paste(textarea);
+                    break;
+                case 'x':
+                    deleteChar(textarea);
+                    break;
+                case 'r':
+                    vimBuffer = 'r';
+                    break;
+                case 'u':
+                    // Simple undo (reload content)
+                    break;
+                case 'a':
+                    vimMode = 'insert';
+                    moveCursor(textarea, 1);
+                    updateVimStatus();
+                    break;
+                case 'A':
+                    vimMode = 'insert';
+                    moveToLineEnd(textarea);
+                    updateVimStatus();
+                    break;
+                case 'o':
+                    vimMode = 'insert';
+                    insertNewLine(textarea, false);
+                    updateVimStatus();
+                    break;
+                case 'O':
+                    vimMode = 'insert';
+                    insertNewLine(textarea, true);
+                    updateVimStatus();
+                    break;
+                default:
+                    // Unknown command, clear buffer
+                    vimBuffer = '';
+                    break;
+            }
+            
+            vimCount = '';
+            updateVimStatus();
+        });
+        
+        function updateVimStatus() {
+            const status = document.getElementById('vim-status');
+            let statusText = vimMode.toUpperCase();
+            if (vimCount) statusText += ' ' + vimCount;
+            if (vimBuffer) statusText += ' ' + vimBuffer;
+            status.textContent = statusText;
+        }
+        
+        function getCurrentLine(text, pos) {
+            return text.substring(0, pos).split('\n').length - 1;
+        }
+        
+        function getCurrentColumn(text, pos) {
+            const lines = text.substring(0, pos).split('\n');
+            return lines[lines.length - 1].length;
+        }
+        
+        function moveCursor(textarea, offset) {
+            const newPos = Math.max(0, Math.min(textarea.value.length, textarea.selectionStart + offset));
+            textarea.setSelectionRange(newPos, newPos);
+        }
+        
+        function moveCursorDown(textarea, count) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const currentCol = getCurrentColumn(textarea.value, textarea.selectionStart);
+            const targetLine = Math.min(lines.length - 1, currentLine + count);
+            const targetCol = Math.min(currentCol, lines[targetLine].length);
+            const targetPos = getPositionFromLineCol(textarea.value, targetLine, targetCol);
+            textarea.setSelectionRange(targetPos, targetPos);
+        }
+        
+        function moveCursorUp(textarea, count) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const currentCol = getCurrentColumn(textarea.value, textarea.selectionStart);
+            const targetLine = Math.max(0, currentLine - count);
+            const targetCol = Math.min(currentCol, lines[targetLine].length);
+            const targetPos = getPositionFromLineCol(textarea.value, targetLine, targetCol);
+            textarea.setSelectionRange(targetPos, targetPos);
+        }
+        
+        function getPositionFromLineCol(text, line, col) {
+            const lines = text.split('\n');
+            let pos = 0;
+            for (let i = 0; i < line; i++) {
+                pos += lines[i].length + 1; // +1 for newline
+            }
+            return pos + col;
+        }
+        
+        function moveToLineStart(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const pos = getPositionFromLineCol(textarea.value, currentLine, 0);
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToLineEnd(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const lineLength = lines[currentLine].length;
+            const pos = getPositionFromLineCol(textarea.value, currentLine, lineLength);
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToNextWord(textarea, count) {
+            // Simple word movement
+            const text = textarea.value;
+            let pos = textarea.selectionStart;
+            for (let i = 0; i < count; i++) {
+                pos = text.indexOf(' ', pos);
+                if (pos === -1) {
+                    pos = text.length;
+                    break;
+                }
+                pos++;
+            }
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToPrevWord(textarea, count) {
+            // Simple word movement
+            const text = textarea.value;
+            let pos = textarea.selectionStart;
+            for (let i = 0; i < count; i++) {
+                pos = text.lastIndexOf(' ', pos - 1);
+                if (pos === -1) {
+                    pos = 0;
+                    break;
+                }
+            }
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToEnd(textarea) {
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+        
+        function moveToStart(textarea) {
+            textarea.setSelectionRange(0, 0);
+        }
+        
+        function deleteLine(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            lines.splice(currentLine, 1);
+            textarea.value = lines.join('\n');
+            const newPos = getPositionFromLineCol(textarea.value, Math.min(currentLine, lines.length - 1), 0);
+            textarea.setSelectionRange(newPos, newPos);
+        }
+        
+        function yankLine(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const lineText = lines[currentLine];
+            navigator.clipboard.writeText(lineText);
+        }
+        
+        function paste(textarea) {
+            navigator.clipboard.readText().then(text => {
+                const pos = textarea.selectionStart;
+                const before = textarea.value.substring(0, pos);
+                const after = textarea.value.substring(pos);
+                textarea.value = before + text + after;
+                textarea.setSelectionRange(pos + text.length, pos + text.length);
+            });
+        }
+        
+        function deleteChar(textarea) {
+            const pos = textarea.selectionStart;
+            if (pos < textarea.value.length) {
+                const before = textarea.value.substring(0, pos);
+                const after = textarea.value.substring(pos + 1);
+                textarea.value = before + after;
+                textarea.setSelectionRange(pos, pos);
+            }
+        }
+        
+        function insertNewLine(textarea, above) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const currentCol = getCurrentColumn(textarea.value, textarea.selectionStart);
+            
+            if (above) {
+                lines.splice(currentLine, 0, '');
+            } else {
+                lines.splice(currentLine + 1, 0, '');
+            }
+            
+            textarea.value = lines.join('\n');
+            const newLine = above ? currentLine : currentLine + 1;
+            const newPos = getPositionFromLineCol(textarea.value, newLine, 0);
+            textarea.setSelectionRange(newPos, newPos);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't handle shortcuts if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            if (e.code === 'Space' && currentSession.isRecording) {
+                e.preventDefault();
+                stopTiming();
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                prevLine();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                nextLine();
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('ai-modal');
+            if (event.target === modal) {
+                closeAIModal();
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,20 +1,57 @@
-Play a song/audiobook in iTunes/Music on Mac, and use LyricStamp to: 
-- [x] Fetch plain text lyrics/scripts from the Internet, or a local `.txt` file, or the clipboard
-- [x] Add timestamps to the plain text lyrics by playing a keyboard game alongside (think lip-sync)
-- [ ] Add optional (context-based) phonetics automatically
-  - [x] Romaji for Japanese
-  - [x] Jyutping for Cantonese
-  - [ ] Pinyin for Mandarin
-- [ ] Add optional (multi-language, i.e., one-to-many) translations automatically
+# LyricStamp Web Interface
 
-This produces a `.lrcx` to be used in tandem with [LyricsX](https://github.com/ddddxxx/LyricsX) for synchronized lyrics/scripts display. (And why do we want synchronization in the first place? To 🎙️Karaoke🥳! And also to learn languages; e.g., to read along while listening and to precisely one-click jump to lines for repetition/reinforcement.)
-![Demo](/demos/language.gif)
+A web-based tool for adding timestamps to lyrics synchronized with Apple Music playback on Mac.
 
-### Usage:
-Run `python lyricstamp.py` to call out the 'game' interface, and follow the on-screen instructions. Here's a small demo.
-![Demo](/demos/demo.gif)
-When the last line is reached, press 'Enter' to end stamping, and save a `media_title - artist.lrcx` file to your LyricsX folder (where the `media_title` and `artist` are extracted from Music's now playing track properties via AppleScript). Enjoy!
+## Features
 
-### Motivation:
-- LyricsX works wonders with Apple Music, especially for songs with no built-in synchronized lyrics. However, LyricsX relies on `*.lrcx` searched and fetched from a few Asia-based web services, and understandably, supply for songs in other languages or indie/obscure songs are scarce. And while plain-text lyrics are abundant online, time-stamping solutions I've found (e.g. NLP-based, iMovie timeline adjustment) are either an overkill or a hassle. 
-- Audiobooks (particularly those targeted at language learning) can benefit greatly from having synchronized listening/reading too. These audiobooks often do come with an accompanying .pdf or .epub for the scripts, which can be easily turned into .txt, but time-stamping is still a hassle. (Fwiw, my limited research had led me to the so-called 'forced alignment', a sound-wave-analysis-based technique to align texts and audio. Not sure if/how well it can handle multi-language in a single file though.)
+- [x] **Web Interface**: Modern, responsive web UI for easy lyric timing
+- [x] **Apple Music Integration**: Direct control of playback (play/pause, next track, position control)
+- [x] **Multiple Input Sources**: Manual input, file upload, or clipboard
+- [x] **Real-time Timing**: Add timestamps while music plays
+- [x] **Auto-filename Generation**: Creates filenames from current song info
+- [x] **AI Enhancements**: Optional romaji and translation support via AI
+- [x] **Vim Keybindings**: Full Vim mode support in lyrics textarea
+- [x] **Separate Workflow**: Setup page for lyrics input, timing page for timestamping
+
+## Installation
+
+1. Clone this repository
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the web interface:
+   ```bash
+   python web_lyricstamp.py
+   ```
+4. Open your browser to `http://localhost:5000`
+
+## Usage
+
+### Setup Page (`/setup`)
+1. Enter lyrics manually, upload a file, or paste from clipboard
+2. The filename will auto-generate from the current song info
+3. Click "Start Session" to begin timing
+
+### Timing Page (`/timing`)
+1. **Music Control**: Use the Apple Music controls to manage playback
+2. **Timing**: Click "Start Timing" and press "Next" to add timestamps
+3. **Navigation**: Use arrow keys or buttons to move between lines
+4. **AI Enhancements**: Use the "🤖 AI Enhancements" button to add romaji or translations
+5. **Save**: Click "Save File" when done, or it will prompt you at the last line
+
+### Keyboard Shortcuts
+- **Space**: Stop timing (when recording)
+- **Left Arrow**: Previous line
+- **Right Arrow**: Next line
+- **Vim Mode**: Full Vim keybindings in lyrics textarea
+
+## Output
+
+Saves `.lrcx` files to `~/Music/LyricsX/` for use with [LyricsX](https://github.com/ddddxxx/LyricsX).
+
+## Motivation
+
+LyricsX works wonders with Apple Music, especially for songs with no built-in synchronized lyrics. However, LyricsX relies on `*.lrcx` files from web services, and supply for songs in other languages or indie/obscure songs can be scarce. While plain-text lyrics are abundant online, time-stamping solutions are often overkill or a hassle.
+
+This web interface provides a simple, intuitive way to add timestamps to any lyrics while listening to music, making synchronized lyrics accessible for any song.

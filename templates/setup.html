@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyricStamp - Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+        }
+
+        .vim-status {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .music-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .music-info h3 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .now-playing {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 LyricStamp</h1>
+            <p>Prepare your lyrics for timing</p>
+        </div>
+
+        <div class="content">
+            <!-- Music Info Section -->
+            <div class="section">
+                <h2>🎵 Current Song</h2>
+                <div class="music-info">
+                    <div class="input-group">
+                        <label>Currently Playing:</label>
+                        <div id="now-playing" class="now-playing">
+                            <span id="current-track">No track playing</span>
+                        </div>
+                    </div>
+
+                    <div class="music-controls">
+                        <button class="btn btn-secondary" onclick="playPause()" id="play-pause-btn">▶️ Play/Pause</button>
+                        <button class="btn btn-secondary" onclick="playFromStart()">⏮️ Play from Start</button>
+                        <button class="btn btn-secondary" onclick="nextTrack()">⏭️ Next Track</button>
+                        <button class="btn btn-secondary" onclick="refreshNowPlaying()">🔄 Refresh</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lyrics Setup Section -->
+            <div class="section">
+                <h2>📝 Lyrics Setup</h2>
+                
+                <div class="input-group">
+                    <label for="lyrics-source">Lyrics Source:</label>
+                    <select id="lyrics-source" onchange="toggleLyricsInput()">
+                        <option value="manual">Manual Input</option>
+                        <option value="file">Upload File</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="file-upload-group" style="display: none;">
+                    <label for="lyrics-file">Upload Lyrics File:</label>
+                    <input type="file" id="lyrics-file" accept=".txt,.lrc,.lrcx" onchange="handleFileUpload()">
+                </div>
+
+                <div class="input-group" id="manual-lyrics-group" style="display: none;">
+                    <label for="lyrics-text">Lyrics (one line per line):</label>
+                    <div class="file-upload-wrapper">
+                        <textarea id="lyrics-text" rows="15" placeholder="Enter your lyrics here..."></textarea>
+                        <div id="vim-status" class="vim-status">NORMAL</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="output-filename">Output Filename:</label>
+                    <input type="text" id="output-filename" placeholder="song_name.lrcx" value="untitled.lrcx">
+                    <button type="button" class="btn btn-secondary" onclick="updateFilenameFromSong()" style="margin-top: 5px;">🎵 Use Current Song</button>
+                </div>
+
+                <button class="btn btn-success" onclick="startSession()">🚀 Start Timing Session</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshNowPlaying();
+            updateSongDuration();
+            // Auto-populate filename from current song
+            updateFilenameFromSong();
+        });
+
+        function toggleLyricsInput() {
+            const source = document.getElementById('lyrics-source').value;
+            const manualGroup = document.getElementById('manual-lyrics-group');
+            const fileGroup = document.getElementById('file-upload-group');
+            
+            if (source === 'manual') {
+                manualGroup.style.display = 'block';
+                fileGroup.style.display = 'none';
+            } else if (source === 'file') {
+                manualGroup.style.display = 'block';
+                fileGroup.style.display = 'block';
+            } else {
+                manualGroup.style.display = 'none';
+                fileGroup.style.display = 'none';
+            }
+        }
+
+        function handleFileUpload() {
+            const fileInput = document.getElementById('lyrics-file');
+            const file = fileInput.files[0];
+            const lyricsTextarea = document.getElementById('lyrics-text');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    // Populate the textarea for editing
+                    lyricsTextarea.value = content;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function startSession() {
+            const source = document.getElementById('lyrics-source').value;
+            const filename = document.getElementById('output-filename').value;
+            
+            let lyrics = '';
+            if (source === 'manual') {
+                lyrics = document.getElementById('lyrics-text').value;
+            } else if (source === 'file') {
+                const fileInput = document.getElementById('lyrics-file');
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert('Please select a file first');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileContent = e.target.result;
+                    startSessionWithLyrics(fileContent, filename);
+                };
+                reader.readAsText(file);
+                return;
+            }
+            
+            startSessionWithLyrics(lyrics, filename);
+        }
+
+        function startSessionWithLyrics(lyrics, filename) {
+            fetch('/api/start_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    source: 'manual',
+                    lyrics: lyrics,
+                    filename: filename
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to timing page
+                    window.location.href = '/timing';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start session');
+            });
+        }
+
+        // Music Control Functions
+        function refreshNowPlaying() {
+            fetch('/api/music/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const trackInfo = `${data.title} - ${data.artist}`;
+                        document.getElementById('current-track').textContent = trackInfo;
+                        // Update duration when track changes
+                        updateSongDuration();
+                    } else {
+                        document.getElementById('current-track').textContent = 'No track playing';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching now playing:', error);
+                    document.getElementById('current-track').textContent = 'Error loading track info';
+                });
+        }
+
+        function playPause() {
+            fetch('/api/music/play_pause', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the now playing info after a short delay
+                    setTimeout(refreshNowPlaying, 500);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling play/pause:', error);
+                alert('Failed to control playback');
+            });
+        }
+
+        function playFromStart() {
+            fetch('/api/music/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(refreshNowPlaying, 500);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error playing from start:', error);
+                alert('Failed to play from start');
+            });
+        }
+
+        function nextTrack() {
+            fetch('/api/music/next', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(refreshNowPlaying, 500);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error playing next track:', error);
+                alert('Failed to play next track');
+            });
+        }
+
+        function updateFilenameFromSong() {
+            fetch('/api/music/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create safe filename from title and artist
+                        const title = data.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_').substring(0, 50);
+                        const artist = data.artist.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_').substring(0, 50);
+                        const filename = `${title}_-_${artist}.lrcx`;
+                        document.getElementById('output-filename').value = filename;
+                    } else {
+                        alert('Could not get current song info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting song info:', error);
+                    alert('Error getting current song info');
+                });
+        }
+
+        function updateSongDuration() {
+            fetch('/api/music/duration')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const duration = data.duration;
+                        // Duration info available if needed
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching duration:', error);
+                });
+        }
+
+        // Vim keybindings for lyrics textarea
+        let vimMode = 'normal';
+        let vimBuffer = '';
+        let vimCount = '';
+        
+        document.getElementById('lyrics-text').addEventListener('keydown', function(e) {
+            if (vimMode === 'insert') {
+                // In insert mode, only handle Escape to return to normal mode
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    vimMode = 'normal';
+                    updateVimStatus();
+                }
+                return; // Let normal typing work
+            }
+            
+            // Normal mode - handle Vim commands
+            e.preventDefault();
+            
+            if (e.key === 'i') {
+                vimMode = 'insert';
+                updateVimStatus();
+                return;
+            }
+            
+            if (e.key === 'v') {
+                // Visual mode (simple implementation)
+                vimMode = 'visual';
+                updateVimStatus();
+                return;
+            }
+            
+            if (e.key === 'Escape') {
+                vimMode = 'normal';
+                vimBuffer = '';
+                vimCount = '';
+                updateVimStatus();
+                return;
+            }
+            
+            // Number keys for count
+            if (/^[0-9]$/.test(e.key)) {
+                vimCount += e.key;
+                updateVimStatus();
+                return;
+            }
+            
+            // Movement commands
+            const count = parseInt(vimCount) || 1;
+            const textarea = e.target;
+            const lines = textarea.value.split('\n');
+            const currentPos = textarea.selectionStart;
+            const currentLine = getCurrentLine(textarea.value, currentPos);
+            const currentCol = getCurrentColumn(textarea.value, currentPos);
+            
+            switch (e.key) {
+                case 'h':
+                    moveCursor(textarea, -count);
+                    break;
+                case 'l':
+                    moveCursor(textarea, count);
+                    break;
+                case 'j':
+                    moveCursorDown(textarea, count);
+                    break;
+                case 'k':
+                    moveCursorUp(textarea, count);
+                    break;
+                case '0':
+                    moveToLineStart(textarea);
+                    break;
+                case '$':
+                    moveToLineEnd(textarea);
+                    break;
+                case 'w':
+                    moveToNextWord(textarea, count);
+                    break;
+                case 'b':
+                    moveToPrevWord(textarea, count);
+                    break;
+                case 'G':
+                    moveToEnd(textarea);
+                    break;
+                case 'g':
+                    if (vimBuffer === 'g') {
+                        moveToStart(textarea);
+                        vimBuffer = '';
+                    } else {
+                        vimBuffer = 'g';
+                    }
+                    break;
+                case 'd':
+                    if (vimBuffer === 'd') {
+                        deleteLine(textarea);
+                        vimBuffer = '';
+                    } else {
+                        vimBuffer = 'd';
+                    }
+                    break;
+                case 'y':
+                    if (vimBuffer === 'y') {
+                        yankLine(textarea);
+                        vimBuffer = '';
+                    } else {
+                        vimBuffer = 'y';
+                    }
+                    break;
+                case 'p':
+                    paste(textarea);
+                    break;
+                case 'x':
+                    deleteChar(textarea);
+                    break;
+                case 'r':
+                    vimBuffer = 'r';
+                    break;
+                case 'u':
+                    // Simple undo (reload content)
+                    break;
+                case 'a':
+                    vimMode = 'insert';
+                    moveCursor(textarea, 1);
+                    updateVimStatus();
+                    break;
+                case 'A':
+                    vimMode = 'insert';
+                    moveToLineEnd(textarea);
+                    updateVimStatus();
+                    break;
+                case 'o':
+                    vimMode = 'insert';
+                    insertNewLine(textarea, false);
+                    updateVimStatus();
+                    break;
+                case 'O':
+                    vimMode = 'insert';
+                    insertNewLine(textarea, true);
+                    updateVimStatus();
+                    break;
+                default:
+                    // Unknown command, clear buffer
+                    vimBuffer = '';
+                    break;
+            }
+            
+            vimCount = '';
+            updateVimStatus();
+        });
+        
+        function updateVimStatus() {
+            const status = document.getElementById('vim-status');
+            let statusText = vimMode.toUpperCase();
+            if (vimCount) statusText += ' ' + vimCount;
+            if (vimBuffer) statusText += ' ' + vimBuffer;
+            status.textContent = statusText;
+        }
+        
+        function getCurrentLine(text, pos) {
+            return text.substring(0, pos).split('\n').length - 1;
+        }
+        
+        function getCurrentColumn(text, pos) {
+            const lines = text.substring(0, pos).split('\n');
+            return lines[lines.length - 1].length;
+        }
+        
+        function moveCursor(textarea, offset) {
+            const newPos = Math.max(0, Math.min(textarea.value.length, textarea.selectionStart + offset));
+            textarea.setSelectionRange(newPos, newPos);
+        }
+        
+        function moveCursorDown(textarea, count) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const currentCol = getCurrentColumn(textarea.value, textarea.selectionStart);
+            const targetLine = Math.min(lines.length - 1, currentLine + count);
+            const targetCol = Math.min(currentCol, lines[targetLine].length);
+            const targetPos = getPositionFromLineCol(textarea.value, targetLine, targetCol);
+            textarea.setSelectionRange(targetPos, targetPos);
+        }
+        
+        function moveCursorUp(textarea, count) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const currentCol = getCurrentColumn(textarea.value, textarea.selectionStart);
+            const targetLine = Math.max(0, currentLine - count);
+            const targetCol = Math.min(currentCol, lines[targetLine].length);
+            const targetPos = getPositionFromLineCol(textarea.value, targetLine, targetCol);
+            textarea.setSelectionRange(targetPos, targetPos);
+        }
+        
+        function getPositionFromLineCol(text, line, col) {
+            const lines = text.split('\n');
+            let pos = 0;
+            for (let i = 0; i < line; i++) {
+                pos += lines[i].length + 1; // +1 for newline
+            }
+            return pos + col;
+        }
+        
+        function moveToLineStart(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const pos = getPositionFromLineCol(textarea.value, currentLine, 0);
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToLineEnd(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const lineLength = lines[currentLine].length;
+            const pos = getPositionFromLineCol(textarea.value, currentLine, lineLength);
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToNextWord(textarea, count) {
+            // Simple word movement
+            const text = textarea.value;
+            let pos = textarea.selectionStart;
+            for (let i = 0; i < count; i++) {
+                pos = text.indexOf(' ', pos);
+                if (pos === -1) {
+                    pos = text.length;
+                    break;
+                }
+                pos++;
+            }
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToPrevWord(textarea, count) {
+            // Simple word movement
+            const text = textarea.value;
+            let pos = textarea.selectionStart;
+            for (let i = 0; i < count; i++) {
+                pos = text.lastIndexOf(' ', pos - 1);
+                if (pos === -1) {
+                    pos = 0;
+                    break;
+                }
+            }
+            textarea.setSelectionRange(pos, pos);
+        }
+        
+        function moveToEnd(textarea) {
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+        
+        function moveToStart(textarea) {
+            textarea.setSelectionRange(0, 0);
+        }
+        
+        function deleteLine(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            lines.splice(currentLine, 1);
+            textarea.value = lines.join('\n');
+            const newPos = getPositionFromLineCol(textarea.value, Math.min(currentLine, lines.length - 1), 0);
+            textarea.setSelectionRange(newPos, newPos);
+        }
+        
+        function yankLine(textarea) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const lineText = lines[currentLine];
+            navigator.clipboard.writeText(lineText);
+        }
+        
+        function paste(textarea) {
+            navigator.clipboard.readText().then(text => {
+                const pos = textarea.selectionStart;
+                const before = textarea.value.substring(0, pos);
+                const after = textarea.value.substring(pos);
+                textarea.value = before + text + after;
+                textarea.setSelectionRange(pos + text.length, pos + text.length);
+            });
+        }
+        
+        function deleteChar(textarea) {
+            const pos = textarea.selectionStart;
+            if (pos < textarea.value.length) {
+                const before = textarea.value.substring(0, pos);
+                const after = textarea.value.substring(pos + 1);
+                textarea.value = before + after;
+                textarea.setSelectionRange(pos, pos);
+            }
+        }
+        
+        function insertNewLine(textarea, above) {
+            const lines = textarea.value.split('\n');
+            const currentLine = getCurrentLine(textarea.value, textarea.selectionStart);
+            const currentCol = getCurrentColumn(textarea.value, textarea.selectionStart);
+            
+            if (above) {
+                lines.splice(currentLine, 0, '');
+            } else {
+                lines.splice(currentLine + 1, 0, '');
+            }
+            
+            textarea.value = lines.join('\n');
+            const newLine = above ? currentLine : currentLine + 1;
+            const newPos = getPositionFromLineCol(textarea.value, newLine, 0);
+            textarea.setSelectionRange(newPos, newPos);
+        }
+    </script>
+</body>
+</html> 

@@ -73,3 +73,11 @@ def play_next():
         end tell
     '''
     return execute(s)
+
+def get_duration():
+    script = '''
+        tell application "Music"
+            get duration of current track
+        end tell
+    '''
+    return float(execute(script))
