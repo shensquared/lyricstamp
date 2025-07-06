@@ -2,6 +2,8 @@
 
 A web-based tool for adding timestamps to lyrics synchronized with Apple Music playback on Mac.
 
+![LyricStamp Icon](lyricstamp.png)
+
 ## Features
 
 - [x] **Web Interface**: Modern, responsive web UI for easy lyric timing
@@ -12,6 +14,8 @@ A web-based tool for adding timestamps to lyrics synchronized with Apple Music p
 - [x] **AI Enhancements**: Optional romaji and translation support via AI
 - [x] **Vim Keybindings**: Full Vim mode support in lyrics textarea
 - [x] **Separate Workflow**: Setup page for lyrics input, timing page for timestamping
+- [x] **Display Page**: View existing lyrics files with synchronized highlighting
+- [x] **AI Processing Page**: Real-time status monitoring for AI enhancements
 
 ## Installation
 
@@ -39,6 +43,19 @@ A web-based tool for adding timestamps to lyrics synchronized with Apple Music p
 3. **Navigation**: Use arrow keys or buttons to move between lines
 4. **AI Enhancements**: Use the "🤖 AI Enhancements" button to add romaji or translations
 5. **Save**: Click "Save File" when done, or it will prompt you at the last line
+
+### Display Page (`/display`)
+1. **Auto-load**: Automatically loads lyrics file matching current song
+2. **Synchronized Display**: Highlights current line based on music position
+3. **Music Control**: Full Apple Music integration for playback control
+4. **File Info**: Shows song title, artist, and filename information
+
+### AI Processing Page (`/ai-processing`)
+1. **Real-time Status**: Live monitoring of AI enhancement progress
+2. **Progress Tracking**: Visual progress bar and percentage completion
+3. **Processing Details**: Shows current line being processed and total lines
+4. **Status Indicators**: Color-coded status (idle, processing, completed, error)
+5. **Thinking Animation**: Visual feedback during AI processing
 
 ### Keyboard Shortcuts
 - **Space**: Stop timing (when recording)
