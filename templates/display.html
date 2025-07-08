@@ -368,6 +368,7 @@
                 <div style="display: flex; justify-content: flex-end; align-items: center;">
                     <button class="btn btn-secondary" onclick="window.location.href='/karaoke'">🎤 Karaoke</button>
                     <button class="btn btn-secondary" onclick="window.location.href='/setup'">📝 Setup</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='/timing'">⏱️ Timestamping</button>
                     <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
                 </div>
             </div>
@@ -596,8 +597,8 @@
                     // Update slider immediately using cached duration
                     if (window.cachedDuration && window.cachedDuration > 0) {
                         const progress = (currentPosition / window.cachedDuration) * 100;
-                        document.getElementById('position-slider').value = progress;
-                    }
+                                    document.getElementById('position-slider').value = progress;
+                                }
                     
                     // Update lyrics highlighting immediately
                     updateCurrentLine();
@@ -605,17 +606,17 @@
                     // Send position update to Apple Music if in manual mode (non-blocking)
                     if (isManualMode) {
                         // Use a non-blocking approach - don't wait for response
-                        fetch('/api/music/position', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                position: time
-                            })
+                    fetch('/api/music/position', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            position: time
+                        })
                         }).catch(error => {
                             console.error('Error updating position:', error);
-                        });
+                    });
                     }
                 }
             }
@@ -624,25 +625,25 @@
         function handleLyricsScroll() {
             // Only handle scroll for auto-scrolling in auto mode
             if (!isManualMode) {
-                const container = document.getElementById('lyrics-container');
-                const containerRect = container.getBoundingClientRect();
-                const containerCenter = containerRect.top + containerRect.height / 2;
+            const container = document.getElementById('lyrics-container');
+            const containerRect = container.getBoundingClientRect();
+            const containerCenter = containerRect.top + containerRect.height / 2;
+            
+            // Find the line closest to the center of the visible area
+            let closestLineIndex = -1;
+            let closestDistance = Infinity;
+            
+            document.querySelectorAll('.lyric-line').forEach((line, index) => {
+                const lineRect = line.getBoundingClientRect();
+                const lineCenter = lineRect.top + lineRect.height / 2;
+                const distance = Math.abs(lineCenter - containerCenter);
                 
-                // Find the line closest to the center of the visible area
-                let closestLineIndex = -1;
-                let closestDistance = Infinity;
-                
-                document.querySelectorAll('.lyric-line').forEach((line, index) => {
-                    const lineRect = line.getBoundingClientRect();
-                    const lineCenter = lineRect.top + lineRect.height / 2;
-                    const distance = Math.abs(lineCenter - containerCenter);
-                    
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        closestLineIndex = index;
-                    }
-                });
-                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestLineIndex = index;
+                }
+            });
+            
                 // Auto-scroll to keep current line visible
                 if (closestLineIndex >= 0) {
                     const currentLine = document.getElementById(`line-${closestLineIndex}`);
@@ -688,13 +689,13 @@
                             
                             // Update lyrics highlighting immediately (highest priority)
                             updateCurrentLine();
-                            
-                            // Update position display
-                            const minutes = Math.floor(currentPosition / 60);
-                            const seconds = Math.floor(currentPosition % 60);
-                            const milliseconds = Math.floor((currentPosition % 1) * 1000);
-                            document.getElementById('position-display').textContent = 
-                                `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+                        
+                        // Update position display
+                        const minutes = Math.floor(currentPosition / 60);
+                        const seconds = Math.floor(currentPosition % 60);
+                        const milliseconds = Math.floor((currentPosition % 1) * 1000);
+                        document.getElementById('position-display').textContent = 
+                            `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
                             
                             // Update slider using cached duration (non-blocking)
                             if (window.cachedDuration && !isSliderBeingDragged) {
