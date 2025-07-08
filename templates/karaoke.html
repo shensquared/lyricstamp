@@ -200,7 +200,6 @@
         <button class="btn" onclick="window.location.href='/timing'">⏱️ Timing</button>
         <button class="btn" onclick="window.location.href='/display'">📖 Scrolling</button>
         <button class="btn" onclick="window.location.href='/ai-processing'">🤖 AI</button>
-        <button class="btn" onclick="window.location.href='/'">🏠 Home</button>
     </div>
 
 
@@ -392,6 +391,52 @@
                 .catch(error => {
                     // Silent error handling
                 });
+        }
+
+        // Music control functions
+        function playPause() {
+            fetch('/api/music/play_pause', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(refreshNowPlaying, 500);
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling play/pause:', error);
+            });
+        }
+
+        function previousTrack() {
+            // For now, just go to previous line in lyrics
+            if (currentLineIndex > 0) {
+                currentLineIndex--;
+                updateKaraokeDisplay();
+            }
+        }
+
+        function nextTrack() {
+            fetch('/api/music/next', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setTimeout(refreshNowPlaying, 500);
+                    loadLyrics(); // Reload lyrics for new track
+                }
+            })
+            .catch(error => {
+                console.error('Error playing next track:', error);
+            });
         }
 
         function refreshNowPlaying() {
