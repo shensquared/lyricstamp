@@ -245,9 +245,9 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-                    <button class="btn btn-success" onclick="startSession()">🚀 Timestamping</button>
-                    <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
+                    <button class="btn btn-success" onclick="startSession()">⏱️ Timestamping</button>
                     <button class="btn btn-secondary" onclick="window.location.href='/karaoke'">🎤 Karaoke</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='/ai-processing'">🤖 AI</button>
                     <button class="btn btn-secondary" onclick="window.location.href='/display'">📖 Scrolling</button>
                 </div>
             </div>
@@ -312,7 +312,7 @@
                 const fileInput = document.getElementById('lyrics-file');
                 const file = fileInput.files[0];
                 if (!file) {
-                    alert('Please select a file first');
+                    console.log('Please select a file first');
                     return;
                 }
                 
@@ -346,12 +346,12 @@
                     // Redirect to timing page
                     window.location.href = '/timing';
                 } else {
-                    alert('Error: ' + data.error);
+                    console.log('Error: ' + data.error);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to start session');
+                console.log('Failed to start session');
             });
         }
 
@@ -390,12 +390,12 @@
                     // Refresh the now playing info after a short delay
                     setTimeout(refreshNowPlaying, 500);
                 } else {
-                    alert('Error: ' + data.error);
+                    console.log('Error: ' + data.error);
                 }
             })
             .catch(error => {
                 console.error('Error toggling play/pause:', error);
-                alert('Failed to control playback');
+                console.log('Failed to control playback');
             });
         }
 
@@ -411,12 +411,12 @@
                 if (data.success) {
                     setTimeout(refreshNowPlaying, 500);
                 } else {
-                    alert('Error: ' + data.error);
+                    console.log('Error: ' + data.error);
                 }
             })
             .catch(error => {
                 console.error('Error playing from start:', error);
-                alert('Failed to play from start');
+                console.log('Failed to play from start');
             });
         }
 
@@ -432,12 +432,12 @@
                 if (data.success) {
                     setTimeout(refreshNowPlaying, 500);
                 } else {
-                    alert('Error: ' + data.error);
+                    console.log('Error: ' + data.error);
                 }
             })
             .catch(error => {
                 console.error('Error playing next track:', error);
-                alert('Failed to play next track');
+                console.log('Failed to play next track');
             });
         }
 
@@ -452,12 +452,12 @@
                         const filename = `${title} - ${artist}.lrcx`;
                         document.getElementById('output-filename').value = filename;
                     } else {
-                        alert('Could not get current song info');
+                        console.log('Could not get current song info');
                     }
                 })
                 .catch(error => {
                     console.error('Error getting song info:', error);
-                    alert('Error getting current song info');
+                    console.log('Error getting current song info');
                 });
         }
 
@@ -466,12 +466,12 @@
             const filename = document.getElementById('output-filename').value;
             
             if (!lyrics.trim()) {
-                alert('Please enter some lyrics first');
+                console.log('Please enter some lyrics first');
                 return;
             }
             
             if (!filename.trim()) {
-                alert('Please enter a filename first');
+                console.log('Please enter a filename first');
                 return;
             }
             
@@ -493,14 +493,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(`Lyrics saved successfully!\n\nFilename: ${data.filename}\nLocation: ${data.full_path}`);
+                    console.log(`Lyrics saved successfully!\n\nFilename: ${data.filename}\nLocation: ${data.full_path}`);
                 } else {
-                    alert('Error saving lyrics: ' + data.error);
+                    console.log('Error saving lyrics: ' + data.error);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to save lyrics');
+                console.log('Failed to save lyrics');
             });
         }
 
@@ -826,10 +826,10 @@
         function copySongInfo() {
             const trackInfo = document.getElementById('current-track').textContent;
             navigator.clipboard.writeText(trackInfo).then(() => {
-                alert('Song info copied to clipboard!');
+                console.log('Song info copied to clipboard!');
             }).catch(err => {
                 console.error('Error copying song info:', err);
-                alert('Failed to copy song info.');
+                console.log('Failed to copy song info.');
             });
         }
     </script>
