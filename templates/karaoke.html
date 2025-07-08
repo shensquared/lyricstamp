@@ -71,6 +71,28 @@
             font-size: 1.8em;
         }
 
+        .lyric-line.romaji {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+            margin-top: -5px;
+        }
+
+        .lyric-line.translation {
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            margin-top: -5px;
+        }
+
+        .lyric-line.current .lyric-line.romaji {
+            color: rgba(0, 242, 254, 0.8);
+        }
+
+        .lyric-line.current .lyric-line.translation {
+            color: rgba(0, 242, 254, 0.6);
+        }
+
         .progress-overlay {
             position: absolute;
             top: 0;
@@ -237,12 +259,16 @@
         let currentLineIndex = -1;
         let nextLineIndex = -1;
         let progressAnimations = [];
+        let lyricsLoaded = false;
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             refreshNowPlaying();
             loadLyrics();
-            setInterval(updatePosition, 100); // Update every 100ms for better performance
+            // Start position updates after a short delay to ensure lyrics are loaded
+            setTimeout(() => {
+                setInterval(updatePosition, 100); // Update every 100ms for better performance
+            }, 500);
             setInterval(refreshNowPlaying, 3000);
             
             // Set up drag and drop
@@ -353,6 +379,7 @@
                     if (data.success) {
                         currentLyrics = data.lines;
                         currentTimestamps = data.timestamps;
+                        lyricsLoaded = true;
                         displayKaraokeLyrics();
                     } else {
                         showNoLyrics();
@@ -400,7 +427,9 @@
         }
 
         function updateKaraokeDisplay() {
-            if (currentLyrics.length === 0) return;
+            if (!lyricsLoaded || currentLyrics.length === 0) {
+                return;
+            }
             
             // Find current and next line indices
             const currentTime = currentPosition;
@@ -443,9 +472,21 @@
             const currentLineEl = document.getElementById('current-line');
             const nextLineEl = document.getElementById('next-line');
             
+            // Clear current content but preserve progress elements
+            const progressOverlay = currentLineEl.querySelector('.progress-overlay');
+            const progressText = currentLineEl.querySelector('.progress-text');
+            currentLineEl.innerHTML = '';
+            nextLineEl.innerHTML = '';
+            
+            // Restore progress elements
+            if (progressOverlay) currentLineEl.appendChild(progressOverlay);
+            if (progressText) currentLineEl.appendChild(progressText);
+            
             if (currentLineIndex >= 0 && currentLineIndex < currentLyrics.length) {
                 const currentText = currentLyrics[currentLineIndex];
-                currentLineEl.textContent = currentText;
+                // Remove [tr] or [tl] tags for display
+                const displayText = currentText.replace(/^\[tr\]/, '').replace(/^\[tl\]/, '');
+                currentLineEl.textContent = displayText;
                 currentLineEl.classList.add('active');
             } else {
                 currentLineEl.textContent = '';
@@ -454,7 +495,9 @@
             
             if (nextLineIndex >= 0 && nextLineIndex < currentLyrics.length) {
                 const nextText = currentLyrics[nextLineIndex];
-                nextLineEl.textContent = nextText;
+                // Remove [tr] or [tl] tags for display
+                const displayText = nextText.replace(/^\[tr\]/, '').replace(/^\[tl\]/, '');
+                nextLineEl.textContent = displayText;
                 nextLineEl.classList.add('active');
             } else {
                 nextLineEl.textContent = '';
@@ -485,7 +528,14 @@
                 const clipPath = `polygon(0 0, ${progress * 100}% 0, ${progress * 100}% 100%, 0 100%)`;
                 progressOverlay.style.clipPath = clipPath;
                 progressText.style.clipPath = clipPath;
-                progressText.textContent = currentLyrics[currentLineIndex] || '';
+                
+                // Get the original line text (not romaji) for progress text
+                const originalLine = currentLyrics[currentLineIndex];
+                if (originalLine && !originalLine.startsWith('[tr]') && !originalLine.startsWith('[tl]')) {
+                    progressText.textContent = originalLine;
+                } else {
+                    progressText.textContent = '';
+                }
             }
         }
 
@@ -511,7 +561,7 @@
                     }
                 })
                 .catch(error => {
-                    // Silent error handling
+                    console.error('Error updating position:', error);
                 });
         }
 
