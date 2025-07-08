@@ -182,9 +182,35 @@
             text-align: center;
             padding: 40px;
         }
+
+        .drag-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 242, 254, 0.3);
+            border: 4px dashed #00f2fe;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            font-size: 2em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .drag-overlay.active {
+            display: flex;
+        }
     </style>
 </head>
 <body>
+    <div class="drag-overlay" id="drag-overlay">
+        Drop lyrics file here
+    </div>
+
     <div class="karaoke-container" id="karaoke-container" onclick="playPause()">
         <div class="lyrics-stack" id="lyrics-stack">
             <div class="loading">Loading lyrics...</div>
@@ -216,9 +242,109 @@
         document.addEventListener('DOMContentLoaded', function() {
             refreshNowPlaying();
             loadLyrics();
-            setInterval(updatePosition, 50); // Update every 50ms for smooth progress
+            setInterval(updatePosition, 100); // Update every 100ms for better performance
             setInterval(refreshNowPlaying, 3000);
+            
+            // Set up drag and drop
+            setupDragAndDrop();
         });
+
+        function setupDragAndDrop() {
+            const dragOverlay = document.getElementById('drag-overlay');
+            
+            if (!dragOverlay) {
+                return;
+            }
+            
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                document.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            // Handle drag enter and over
+            ['dragenter', 'dragover'].forEach(eventName => {
+                document.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                document.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight(e) {
+                dragOverlay.classList.add('active');
+            }
+            
+            function unhighlight(e) {
+                dragOverlay.classList.remove('active');
+            }
+            
+            // Handle drop
+            document.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    const file = files[0];
+                    
+                    // Check if it's a text file
+                    if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.type === '') {
+                        processDroppedFile(file);
+                    } else {
+                        alert('Please drop a plain text file (.txt)');
+                    }
+                }
+            }
+        }
+
+        function processDroppedFile(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim());
+                
+                if (lines.length === 0) {
+                    return;
+                }
+                
+                saveDroppedLyrics(lines);
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function saveDroppedLyrics(lines) {
+            const timestamps = new Array(lines.length).fill('');
+            
+            const requestData = {
+                lines: lines,
+                timestamps: timestamps
+            };
+            
+            fetch('/api/save_dropped_lyrics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadLyrics();
+                }
+            })
+            .catch(error => {
+                console.error('Error saving lyrics:', error);
+            });
+        }
 
         function loadLyrics() {
             fetch('/api/get_lyrics_file')
@@ -456,6 +582,8 @@
                     // Silent error handling
                 });
         }
+
+
     </script>
 </body>
 </html> 
