@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -25,9 +25,7 @@
             transform: translate(-50%, -50%);
             width: 90vw;
             max-width: 800px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: #95ACF6;
             border-radius: 24px;
             padding: 40px;
             text-align: center;
@@ -35,9 +33,7 @@
             z-index: 1000;
         }
 
-        .karaoke-container:hover {
-            opacity: 0.3;
-        }
+
 
         .lyrics-stack {
             display: flex;
@@ -189,7 +185,7 @@
     </style>
 </head>
 <body>
-    <div class="karaoke-container" id="karaoke-container">
+    <div class="karaoke-container" id="karaoke-container" onclick="playPause()">
         <div class="lyrics-stack" id="lyrics-stack">
             <div class="loading">Loading lyrics...</div>
         </div>
@@ -197,7 +193,7 @@
 
     <div class="controls">
         <button class="btn" onclick="window.location.href='/setup'">📝 Setup</button>
-        <button class="btn" onclick="window.location.href='/timing'">⏱️ Timing</button>
+        <button class="btn" onclick="window.location.href='/timing'">⏱️ Timestamping</button>
         <button class="btn" onclick="window.location.href='/display'">📖 Scrolling</button>
         <button class="btn" onclick="window.location.href='/ai-processing'">🤖 AI</button>
     </div>
