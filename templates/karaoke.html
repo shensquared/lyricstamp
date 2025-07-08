@@ -108,29 +108,38 @@
             transform: translateX(-50%);
             display: flex;
             gap: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            opacity: 1;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
         }
 
-        .karaoke-container:hover .controls {
+        .controls:hover {
             opacity: 1;
+            background: rgba(0, 0, 0, 0.7);
         }
+
+
 
         .btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 2px solid #fff;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
-            backdrop-filter: blur(10px);
+            font-weight: bold;
             transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #fff;
+            color: #333;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         .status {
@@ -187,10 +196,14 @@
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="window.location.href='/display'">📖 Scroll View</button>
         <button class="btn" onclick="window.location.href='/setup'">📝 Setup</button>
         <button class="btn" onclick="window.location.href='/timing'">⏱️ Timing</button>
+        <button class="btn" onclick="window.location.href='/display'">📖 Scrolling</button>
+        <button class="btn" onclick="window.location.href='/ai-processing'">🤖 AI</button>
+        <button class="btn" onclick="window.location.href='/'">🏠 Home</button>
     </div>
+
+
 
     <div class="status" id="status">
         No track playing
