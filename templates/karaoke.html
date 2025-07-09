@@ -265,6 +265,7 @@
         let progressAnimations = [];
         let lyricsLoaded = false;
         let isTranslationMode = false;
+        let additionalInfo = 0; // 0 = normal, 1 = translation, 2 = romaji+translation, etc.
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -385,11 +386,21 @@
                         currentLyrics = data.lines;
                         currentTimestamps = data.timestamps;
                         
-                                // Check if this is translation mode (file starts with <tr>)
-        isTranslationMode = currentLyrics.length > 0 && currentLyrics[0].trim() === '<tr>';
+                                                        // Check if this is translation mode and determine additional info
+                        if (currentLyrics.length > 0) {
+                            const firstLine = currentLyrics[0].trim();
+                            if (firstLine === '<tr>') {
+                                isTranslationMode = true;
+                                additionalInfo = 1; // translation only
+                            } else if (firstLine === '<tr>*2') {
+                                isTranslationMode = true;
+                                additionalInfo = 2; // romaji + translation
+                            }
+                        }
         
         // Debug logging
         console.log('Translation mode:', isTranslationMode);
+        console.log('Additional info:', additionalInfo);
         console.log('First line:', currentLyrics[0]);
         console.log('Total lines:', currentLyrics.length);
         console.log('Total timestamps:', currentTimestamps.length);
@@ -427,11 +438,6 @@
                 currentOriginalLine.className = 'lyric-line current';
                 currentOriginalLine.id = 'current-original-line';
                 
-                // Create current translation line element
-                const currentTranslationLine = document.createElement('div');
-                currentTranslationLine.className = 'lyric-line current translation';
-                currentTranslationLine.id = 'current-translation-line';
-                
                 // Create progress overlay for current original line
                 const progressOverlay = document.createElement('div');
                 progressOverlay.className = 'progress-overlay';
@@ -447,15 +453,23 @@
                 nextOriginalLine.className = 'lyric-line next';
                 nextOriginalLine.id = 'next-original-line';
                 
-                // Create next translation line element
-                const nextTranslationLine = document.createElement('div');
-                nextTranslationLine.className = 'lyric-line next translation';
-                nextTranslationLine.id = 'next-translation-line';
-                
                 stack.appendChild(currentOriginalLine);
-                stack.appendChild(currentTranslationLine);
                 stack.appendChild(nextOriginalLine);
-                stack.appendChild(nextTranslationLine);
+                
+                // Create additional info lines based on additionalInfo value
+                for (let i = 0; i < additionalInfo; i++) {
+                    // Current additional line
+                    const currentAdditionalLine = document.createElement('div');
+                    currentAdditionalLine.className = `lyric-line current additional-${i + 1}`;
+                    currentAdditionalLine.id = `current-additional-${i + 1}-line`;
+                    stack.appendChild(currentAdditionalLine);
+                    
+                    // Next additional line
+                    const nextAdditionalLine = document.createElement('div');
+                    nextAdditionalLine.className = `lyric-line next additional-${i + 1}`;
+                    nextAdditionalLine.id = `next-additional-${i + 1}-line`;
+                    stack.appendChild(nextAdditionalLine);
+                }
             } else {
                 // Create current line element
                 const currentLine = document.createElement('div');
@@ -502,11 +516,12 @@
             if (isTranslationMode) {
                 // In translation mode, we need to handle the actual LRCX format
                 // The timestamps array has one timestamp per original lyric line
-                // But the lyrics array has: <tr>, original1, translation1, original2, translation2, etc.
+                // But the lyrics array has: <tr> or <tr>*2, original1, additional1, [additional2], original2, additional1, [additional2], etc.
                 
                 // Find the current timestamp index by looking at original lyric lines only
                 let timestampIndex = 0;
-                for (let i = 1; i < currentLyrics.length; i += 2) { // Skip <tr> and look at original lines only
+                const linesPerTimestamp = 1 + additionalInfo; // original + additional lines
+                for (let i = 1; i < currentLyrics.length; i += linesPerTimestamp) { // Skip <tr> and look at original lines only
                     if (i < currentTimestamps.length) {
                         const time = parseTimestamp(currentTimestamps[i]);
                         if (time > 0 && time <= currentTime) {
@@ -522,15 +537,15 @@
                     }
                 }
                 
-                // If no current line found, use first pair
+                // If no current line found, use first group
                 if (newCurrentIndex === -1 && currentLyrics.length > 1) {
                     newCurrentIndex = 0;
                 }
                 
-                // Find next pair
+                // Find next group
                 if (newCurrentIndex >= 0) {
                     const nextTimestampIndex = newCurrentIndex + 1;
-                    const nextLineIndex = 1 + (nextTimestampIndex * 2);
+                    const nextLineIndex = 1 + (nextTimestampIndex * linesPerTimestamp);
                     if (nextLineIndex < currentLyrics.length) {
                         newNextIndex = nextTimestampIndex;
                     }
@@ -617,19 +632,17 @@
             }
         }
 
+
+
         function updateTranslationLyricText() {
             const currentOriginalEl = document.getElementById('current-original-line');
-            const currentTranslationEl = document.getElementById('current-translation-line');
             const nextOriginalEl = document.getElementById('next-original-line');
-            const nextTranslationEl = document.getElementById('next-translation-line');
             
             // Clear current content but preserve progress elements
             const progressOverlay = currentOriginalEl.querySelector('.progress-overlay');
             const progressText = currentOriginalEl.querySelector('.progress-text');
             currentOriginalEl.innerHTML = '';
-            currentTranslationEl.innerHTML = '';
             nextOriginalEl.innerHTML = '';
-            nextTranslationEl.innerHTML = '';
             
             // Restore progress elements
             if (progressOverlay) currentOriginalEl.appendChild(progressOverlay);
@@ -637,15 +650,14 @@
             
             // Calculate line indices for translation mode
             // currentLineIndex is now the timestamp index (0-based)
-            // Line structure: <tr>, original1, translation1, original2, translation2, etc.
-            const originalIndex = currentLineIndex >= 0 ? 1 + (currentLineIndex * 2) : -1;
-            const translationIndex = originalIndex >= 0 ? originalIndex + 1 : -1;
-            const nextOriginalIndex = nextLineIndex >= 0 ? 1 + (nextLineIndex * 2) : -1;
-            const nextTranslationIndex = nextOriginalIndex >= 0 ? nextOriginalIndex + 1 : -1;
+            // Line structure: <tr> or <tr>*2, original1, additional1, [additional2], original2, additional1, [additional2], etc.
+            const linesPerTimestamp = 1 + additionalInfo;
+            const originalIndex = currentLineIndex >= 0 ? 1 + (currentLineIndex * linesPerTimestamp) : -1;
+            const nextOriginalIndex = nextLineIndex >= 0 ? 1 + (nextLineIndex * linesPerTimestamp) : -1;
             
             // Debug logging for line index calculation
             if (currentLineIndex >= 0) {
-                console.log(`Translation mode indices - Current: ${currentLineIndex}, Original: ${originalIndex}, Translation: ${translationIndex}`);
+                console.log(`Translation mode indices - Current: ${currentLineIndex}, Original: ${originalIndex}, Additional info: ${additionalInfo}`);
             }
             
             // Update current original line
@@ -658,16 +670,6 @@
                 currentOriginalEl.classList.remove('active');
             }
             
-            // Update current translation line
-            if (translationIndex >= 0 && translationIndex < currentLyrics.length) {
-                const translationText = currentLyrics[translationIndex];
-                currentTranslationEl.textContent = translationText;
-                currentTranslationEl.classList.add('active');
-            } else {
-                currentTranslationEl.textContent = '';
-                currentTranslationEl.classList.remove('active');
-            }
-            
             // Update next original line
             if (nextOriginalIndex >= 0 && nextOriginalIndex < currentLyrics.length) {
                 const nextText = currentLyrics[nextOriginalIndex];
@@ -678,14 +680,40 @@
                 nextOriginalEl.classList.remove('active');
             }
             
-            // Update next translation line
-            if (nextTranslationIndex >= 0 && nextTranslationIndex < currentLyrics.length) {
-                const nextTranslationText = currentLyrics[nextTranslationIndex];
-                nextTranslationEl.textContent = nextTranslationText;
-                nextTranslationEl.classList.add('active');
-            } else {
-                nextTranslationEl.textContent = '';
-                nextTranslationEl.classList.remove('active');
+            // Update additional info lines
+            for (let i = 0; i < additionalInfo; i++) {
+                const currentAdditionalEl = document.getElementById(`current-additional-${i + 1}-line`);
+                const nextAdditionalEl = document.getElementById(`next-additional-${i + 1}-line`);
+                
+                if (currentAdditionalEl && nextAdditionalEl) {
+                    // Clear content
+                    currentAdditionalEl.innerHTML = '';
+                    nextAdditionalEl.innerHTML = '';
+                    
+                    // Calculate indices for this additional line
+                    const currentAdditionalIndex = originalIndex >= 0 ? originalIndex + 1 + i : -1;
+                    const nextAdditionalIndex = nextOriginalIndex >= 0 ? nextOriginalIndex + 1 + i : -1;
+                    
+                    // Update current additional line
+                    if (currentAdditionalIndex >= 0 && currentAdditionalIndex < currentLyrics.length) {
+                        const additionalText = currentLyrics[currentAdditionalIndex];
+                        currentAdditionalEl.textContent = additionalText;
+                        currentAdditionalEl.classList.add('active');
+                    } else {
+                        currentAdditionalEl.textContent = '';
+                        currentAdditionalEl.classList.remove('active');
+                    }
+                    
+                    // Update next additional line
+                    if (nextAdditionalIndex >= 0 && nextAdditionalIndex < currentLyrics.length) {
+                        const nextAdditionalText = currentLyrics[nextAdditionalIndex];
+                        nextAdditionalEl.textContent = nextAdditionalText;
+                        nextAdditionalEl.classList.add('active');
+                    } else {
+                        nextAdditionalEl.textContent = '';
+                        nextAdditionalEl.classList.remove('active');
+                    }
+                }
             }
         }
 
@@ -698,13 +726,14 @@
             if (isTranslationMode) {
                 // In translation mode, currentLineIndex is the timestamp index
                 // We need to find the actual line index for the original lyric
-                const originalLineIndex = 1 + (currentLineIndex * 2);
+                const linesPerTimestamp = 1 + additionalInfo;
+                const originalLineIndex = 1 + (currentLineIndex * linesPerTimestamp);
                 if (originalLineIndex >= currentTimestamps.length) return;
                 
                 currentTimestamp = parseTimestamp(currentTimestamps[originalLineIndex]);
                 
                 // Find next timestamp
-                const nextOriginalLineIndex = 1 + ((currentLineIndex + 1) * 2);
+                const nextOriginalLineIndex = 1 + ((currentLineIndex + 1) * linesPerTimestamp);
                 if (nextOriginalLineIndex < currentTimestamps.length) {
                     nextTimestamp = parseTimestamp(currentTimestamps[nextOriginalLineIndex]);
                 } else {
